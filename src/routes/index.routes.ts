@@ -1,6 +1,6 @@
 import { Express } from 'express'
-import UserRoutes from '~/routes/user.routes'
+import usersRoutes from '~/routes/users.routes'
 const routesAPI = (app: Express) => {
-  app.use('/users', UserRoutes)
+  app.use('/users', usersRoutes)
 }
 export default routesAPI
