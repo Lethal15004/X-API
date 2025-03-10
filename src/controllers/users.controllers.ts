@@ -1,10 +1,21 @@
 import { Response, Request } from 'express'
 
-export const loginController = (req: Request, res: Response) => {
-  const { email, password } = req.body
-  if (email === 'Phamvahuy2004@gmail.com' && password === '123123az') {
-    res.status(200).json({ message: 'Login successful' })
+// Services
+import * as usersServices from '~/services/users.services'
+
+export const registerController = async (req: Request, res: Response) => {
+  const result = await usersServices.register(req.body)
+  if (result) {
+    res.status(201).json({ message: 'User registered successfully' })
   } else {
-    res.status(401).json({ message: 'Invalid credentials' })
+    res.status(400).json({ message: 'User registered failed' })
+  }
+}
+export const loginController = async (req: Request, res: Response) => {
+  const result = await usersServices.login(req.body)
+  if (result) {
+    res.status(201).json({ message: 'User login successfully' })
+  } else {
+    res.status(400).json({ message: 'User login failed' })
   }
 }

@@ -1,11 +1,16 @@
 import express, { Router } from 'express'
 const router: Router = express.Router()
 
+// Schemas Validator in models
+import { UserRegisterSchema, UserLoginSchema, PersonSchema } from '~/models/schemas/users.schemas'
+
 // Middlewares
-import * as usersMiddlewares from '~/middlewares/users.middlewares'
+import validateRequest from '~/middlewares/validateRequest.middlewares'
 
 // Controllers
 import * as usersControllers from '~/controllers/users.controllers'
 
-router.post('/login', usersMiddlewares.loginValidator, usersControllers.loginController)
+router.post('/register', validateRequest(UserRegisterSchema, 'body'), usersControllers.registerController)
+router.post('/login', validateRequest(UserLoginSchema, 'body'), usersControllers.loginController)
+
 export default router

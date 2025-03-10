@@ -6,12 +6,26 @@ datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
 }
-
-model User {
-  id        String   @id @map("_id") @default(auto()) @db.ObjectId
-  username  String
-  email     String
-  password  String
-  createdAt DateTime @default(now())
+enum UserVerifyStatus {
+  Unverified // Là 0
+  Verified // Là 1
+  Banned  // Là -1
 }
-
+model Users {
+  id                   String @id @map("_id") @default(auto()) @db.ObjectId
+  name                 String
+  email                String @unique
+  dateOfBirth          DateTime
+  password             String
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  emailVerifiedToken   String @default("")
+  forgotPasswordToken  String @default("")
+  verifyStatus         Int @default(0)
+  bio                  String @default("")
+  location             String @default("")
+  website              String @default("")
+  username             String @unique @default("")
+  avatar               String @default("")
+  coverPhoto           String @default("")
+}
