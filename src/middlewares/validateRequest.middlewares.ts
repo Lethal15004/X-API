@@ -10,12 +10,12 @@ export const validateRequest =
   async (req: Request, res: Response, next: NextFunction) => {
     const result = await schema.safeParseAsync(req[source])
     if (!result.success) {
-      const errors = result.error.format() // 📌 Format lỗi từ Zod
-      let firstError = 'Validation failed' // 🛠 Giá trị mặc định
+      const errors = result.error.format()
+      let firstError = 'Validation failed'
 
       for (const error of Object.values(errors)) {
         if (typeof error === 'object' && '_errors' in error && Array.isArray(error._errors)) {
-          firstError = error._errors[0] // 🔥 Lấy lỗi đầu tiên
+          firstError = error._errors[0]
           break
         }
       }

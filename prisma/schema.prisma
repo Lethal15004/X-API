@@ -25,7 +25,7 @@ model Users {
   bio                  String @default("")
   location             String @default("")
   website              String @default("")
-  username             String @unique @default("")
+  username             String @unique @default(cuid())
   avatar               String @default("")
   coverPhoto           String @default("")
 }

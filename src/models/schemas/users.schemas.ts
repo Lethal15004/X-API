@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { date, z } from 'zod'
 
 // Service
 import * as usersServices from '~/services/users.services'
@@ -20,7 +20,8 @@ export const UserRegisterSchema = z
       })
       .email('Invalid email format')
       .nonempty('Email cannot be empty')
-      .trim(), // Xóa khoảng trắng ở đầu và cuối
+      .trim() // Xóa khoảng trắng ở đầu và cuối
+      .refine(async (email) => !(await usersServices.checkEmailExist(email)), 'Email already exists'),
     password: z
       .string({
         required_error: 'Password is required'
@@ -31,7 +32,7 @@ export const UserRegisterSchema = z
       .trim(), // Xóa khoảng trắng ở đầu và cuối
     dateOfBirth: z
       .string({ required_error: 'Date of birth is required' })
-      .refine((val) => !isNaN(Date.parse(val)), {
+      .refine((dateOfBirth) => !isNaN(Date.parse(dateOfBirth)), {
         message: 'Invalid date format. Must be ISO-8601 (YYYY-MM-DD)'
       })
       .transform((val) => new Date(`${val}T00:00:00.000Z`)),
@@ -55,7 +56,7 @@ export const UserLoginSchema = z.object({
     .email('Invalid email format')
     .nonempty('Email cannot be empty')
     .trim()
-    .refine(async (email) => !usersServices.checkEmailExist(email), 'Email already exists'),
+    .refine(async (email) => await usersServices.checkEmailExist(email), 'Email does not exist'),
   password: z
     .string({
       required_error: 'Password is required'
@@ -63,16 +64,3 @@ export const UserLoginSchema = z.object({
     .min(8, 'Length password is less 8')
     .max(255, 'Length password is more 255')
 })
-
-export const PersonSchema = z.object({
-  person: z
-    .string({
-      required_error: 'person is required'
-    })
-    .nonempty('person cannot be empty')
-})
-
-// Define type
-export type UserRegister = z.infer<typeof UserRegisterSchema>
-export type UserLogin = z.infer<typeof UserLoginSchema>
-export type Person = z.infer<typeof PersonSchema>
