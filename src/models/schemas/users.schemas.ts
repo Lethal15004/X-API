@@ -1,7 +1,7 @@
 import { date, z } from 'zod'
 
 // Service
-import * as usersServices from '~/services/users.services'
+import { usersService } from '~/index'
 
 // Define schema
 export const UserRegisterSchema = z
@@ -21,7 +21,7 @@ export const UserRegisterSchema = z
       .email('Invalid email format')
       .nonempty('Email cannot be empty')
       .trim() // Xóa khoảng trắng ở đầu và cuối
-      .refine(async (email) => !(await usersServices.checkEmailExist(email)), 'Email already exists'),
+      .refine(async (email) => !(await usersService.checkEmailExist(email)), 'Email already exists'),
     password: z
       .string({
         required_error: 'Password is required'
@@ -56,7 +56,7 @@ export const UserLoginSchema = z.object({
     .email('Invalid email format')
     .nonempty('Email cannot be empty')
     .trim()
-    .refine(async (email) => await usersServices.checkEmailExist(email), 'Email does not exist'),
+    .refine(async (email) => await usersService.checkEmailExist(email), 'Email does not exist'),
   password: z
     .string({
       required_error: 'Password is required'

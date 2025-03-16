@@ -1,13 +1,15 @@
-import { PrismaClient, Users } from '@prisma/client'
+// BaseService
+import { BaseService } from './base.services'
 import { omit } from 'lodash'
-
-const prisma = new PrismaClient()
 
 // Type in models
 import { UserRegisterBody, UserLoginBody } from '~/models/requests/users.requests'
 
 // Schemas Validator in models
 import { UserRegisterSchema, UserLoginSchema } from '~/models/schemas/users.schemas'
+
+// Type in models
+import { Users } from '@prisma/client'
 
 // Utils
 import * as bcryptPassword from '~/utils/bcrypt.utils'
@@ -16,88 +18,103 @@ import * as jwtToken from '~/utils/jwt.utils'
 // Enum
 import { TokenType } from '~/constants/enums'
 
-export const register = async (user: UserRegisterBody): Promise<Users | null> => {
-  try {
-    user = await UserRegisterSchema.parseAsync(user)
-    const userData = omit(user, ['confirm_password'])
-    userData.password = bcryptPassword.hashPassword(userData.password)
-    const newUser = await prisma.users.create({
-      data: {
-        ...userData,
-        bio: '',
-        location: '',
-        website: '',
-        avatar: '',
-        coverPhoto: '',
-        emailVerifiedToken: '',
-        forgotPasswordToken: '',
-        verifyStatus: 0
-      }
-    })
-    const [accessToken, refreshToken] = await Promise.all([signAccessToken(newUser.id), signRefreshToken(newUser.id)])
-    return newUser
-  } catch (error) {
-    console.error(error)
-    return null
-  }
-}
+// Class Service
+export class UsersService extends BaseService {
+  private static instance: UsersService
 
-export const login = async (user: UserLoginBody): Promise<boolean> => {
-  try {
-    user = await UserLoginSchema.parseAsync(user)
-    const userExist = await prisma.users.findFirst({
+  private readonly DEFAULT_USER_DATA = {
+    bio: '',
+    location: '',
+    website: '',
+    avatar: '',
+    coverPhoto: '',
+    emailVerifiedToken: '',
+    forgotPasswordToken: '',
+    verifyStatus: 0
+  }
+
+  private constructor() {
+    super()
+  }
+
+  // Singleton
+  public static getInstance(): UsersService {
+    if (!UsersService.instance) {
+      UsersService.instance = new UsersService()
+    }
+    return UsersService.instance
+  }
+
+  public async register(user: UserRegisterBody): Promise<{
+    user: Users
+    accessToken: string
+    refreshToken: string
+  }> {
+    const validateUser = await UserRegisterSchema.parseAsync(user)
+    const userData = {
+      ...omit(validateUser, ['confirm_password']),
+      ...this.DEFAULT_USER_DATA,
+      password: bcryptPassword.hashPassword(validateUser.password)
+    }
+    const newUser = await this.prisma.users.create({
+      data: userData
+    })
+    const [accessToken, refreshToken] = await Promise.all([
+      this.signAccessToken(newUser.id),
+      this.signRefreshToken(newUser.id)
+    ])
+    return {
+      user: newUser,
+      accessToken,
+      refreshToken
+    }
+  }
+
+  public async login(user: UserLoginBody): Promise<Users | null> {
+    const validateUser = await UserLoginSchema.parseAsync(user)
+    const userExist = await this.prisma.users.findFirst({
       where: {
-        email: user.email
+        email: validateUser.email
       }
     })
-    if (userExist) {
-      const checkPassword = bcryptPassword.verifyPassword(user.password, userExist.password)
-      if (checkPassword) {
-        return true
-      } else {
-        return false
-      }
-    } else return false
-  } catch (error) {
-    console.error(error)
-    return false
+    if (!userExist) return null
+    const checkPassword = bcryptPassword.verifyPassword(validateUser.password, userExist.password)
+    if (!checkPassword) return null
+    return userExist
   }
-}
 
-export const signAccessToken = async (user_id: string): Promise<string> => {
-  return jwtToken.signToken({
-    payload: {
-      user_id,
-      token_type: TokenType.AccessToken
-    },
-    options: {
-      expiresIn: '15m'
-    }
-  })
-}
-export const signRefreshToken = async (user_id: string): Promise<string> => {
-  return jwtToken.signToken({
-    payload: {
-      user_id,
-      token_type: TokenType.RefreshToken
-    },
-    options: {
-      expiresIn: '100d'
-    }
-  })
-}
-
-export const checkEmailExist = async (email: string): Promise<boolean> => {
-  try {
-    const userExist = await prisma.users.findUnique({
-      where: { email }
+  private async signAccessToken(userId: string): Promise<string> {
+    return jwtToken.signToken({
+      payload: {
+        userId,
+        token_type: TokenType.AccessToken
+      },
+      options: {
+        expiresIn: '15m'
+      }
     })
-    if (userExist) {
-      return true
-    } else {
+  }
+
+  private async signRefreshToken(userId: string): Promise<string> {
+    return jwtToken.signToken({
+      payload: {
+        userId,
+        token_type: TokenType.RefreshToken
+      },
+      options: {
+        expiresIn: '100d'
+      }
+    })
+  }
+
+  public async checkEmailExist(email: string): Promise<boolean> {
+    try {
+      const userExist = await this.prisma.users.findUnique({
+        where: { email }
+      })
+      return !!userExist
+    } catch (error) {
       return false
     }
-  } catch (error) {
-    return false
   }
 }
