@@ -12,7 +12,6 @@ export const register = async (
   res: Response,
   next: NextFunction
 ) => {
-  throw new Error('do Huy')
   const user = await usersService.register(req.body)
   if (user) {
     res.status(201).json({ message: 'User registered successfully', id: user['user']['id'] })

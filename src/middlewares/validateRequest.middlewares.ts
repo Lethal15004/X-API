@@ -1,28 +1,38 @@
 import { Request, Response, NextFunction } from 'express'
-import { ZodSchema } from 'zod'
+import { ZodSchema, ZodError } from 'zod'
+
+import { omit } from 'lodash'
+
+// Error class
+import { ErrorWithStatus, ErrorEntity } from '~/models/Errors'
+
+// Constants
+import HTTP_STATUS from '~/constants/httpStatus'
 
 /**
- * Middleware chạy validation bằng Zod
- * @param schema - Schema của Zod để validate
+ * Middleware run validation by Zod
+ * @param schema - Schema of Zod to validate
  */
 export const validateRequest =
   (schema: ZodSchema, source: 'body' | 'query' | 'params' = 'body') =>
   async (req: Request, res: Response, next: NextFunction) => {
-    const result = await schema.safeParseAsync(req[source])
-    if (!result.success) {
-      const errors = result.error.format()
-      let firstError = 'Validation failed'
-
-      for (const error of Object.values(errors)) {
-        if (typeof error === 'object' && '_errors' in error && Array.isArray(error._errors)) {
-          firstError = error._errors[0]
-          break
+    try {
+      const result = await schema.parseAsync(req[source])
+      next()
+    } catch (error) {
+      if (error instanceof ErrorWithStatus && error.getStatus() === HTTP_STATUS.UNAUTHORIZED) {
+        next(error)
+      } else if (error instanceof ZodError) {
+        const entityError = new ErrorEntity({ errors: {} })
+        for (const tmp of error.issues) {
+          entityError.errors[tmp.path[0]] = {
+            message: tmp.message,
+            code: tmp.code
+          }
         }
+        next(entityError)
+        return
       }
-
-      res.status(400).json({ success: false, message: firstError })
-      return
     }
-    next()
   }
 export default validateRequest

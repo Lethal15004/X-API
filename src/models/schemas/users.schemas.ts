@@ -3,6 +3,12 @@ import { date, z } from 'zod'
 // Service
 import { usersService } from '~/index'
 
+// Error
+import { ErrorWithStatus } from '../Errors'
+
+// Error constants
+import HTTP_STATUS from '~/constants/httpStatus'
+
 // Define schema
 export const UserRegisterSchema = z
   .object({
@@ -21,7 +27,15 @@ export const UserRegisterSchema = z
       .email('Invalid email format')
       .nonempty('Email cannot be empty')
       .trim() // Xóa khoảng trắng ở đầu và cuối
-      .refine(async (email) => !(await usersService.checkEmailExist(email)), 'Email already exists'),
+      .superRefine(async (email) => {
+        const isExist = await usersService.checkEmailExist(email)
+        if (isExist) {
+          throw new ErrorWithStatus({
+            message: 'Email already exists',
+            status: HTTP_STATUS.UNAUTHORIZED
+          })
+        }
+      }),
     password: z
       .string({
         required_error: 'Password is required'
@@ -56,7 +70,15 @@ export const UserLoginSchema = z.object({
     .email('Invalid email format')
     .nonempty('Email cannot be empty')
     .trim()
-    .refine(async (email) => await usersService.checkEmailExist(email), 'Email does not exist'),
+    .superRefine(async (email) => {
+      const isExist = await usersService.checkEmailExist(email)
+      if (!isExist) {
+        throw new ErrorWithStatus({
+          message: 'Email does not exist',
+          status: HTTP_STATUS.UNAUTHORIZED
+        })
+      }
+    }),
   password: z
     .string({
       required_error: 'Password is required'
