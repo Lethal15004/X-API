@@ -1,7 +1,7 @@
 import { Router } from 'express'
 const router: Router = Router()
 
-// Schemas Validator in models
+// Schemas
 import { UserRegisterSchema, UserLoginSchema } from '~/models/schemas/users.schemas'
 
 // Middlewares

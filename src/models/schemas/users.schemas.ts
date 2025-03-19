@@ -1,88 +1,65 @@
-import { date, z } from 'zod'
+import { z } from 'zod'
 
-// Service
-import { usersService } from '~/index'
-
-// Error
-import { ErrorWithStatus } from '../Errors'
-
-// Error constants
-import HTTP_STATUS from '~/constants/httpStatus'
+// Constants
+import USERS_MESSAGES from '~/constants/messages'
 
 // Define schema
 export const UserRegisterSchema = z
   .object({
     name: z
       .string({
-        required_error: 'Name is required'
+        required_error: USERS_MESSAGES.NAME_REQUIRED
       })
-      .min(1, 'Name is too short')
-      .max(255, 'Name is too long')
-      .nonempty('Name cannot be empty')
+      .min(5, USERS_MESSAGES.NAME_TOO_SHORT)
+      .max(255, USERS_MESSAGES.NAME_TOO_LONG)
+      .nonempty(USERS_MESSAGES.NAME_CANNOT_BE_EMPTY)
       .trim(), // Xóa khoảng trắng ở đầu và cuối
     email: z
       .string({
-        required_error: 'Email is required'
+        required_error: USERS_MESSAGES.EMAIL_REQUIRED
       })
-      .email('Invalid email format')
-      .nonempty('Email cannot be empty')
-      .trim() // Xóa khoảng trắng ở đầu và cuối
-      .superRefine(async (email) => {
-        const isExist = await usersService.checkEmailExist(email)
-        if (isExist) {
-          throw new ErrorWithStatus({
-            message: 'Email already exists',
-            status: HTTP_STATUS.UNAUTHORIZED
-          })
-        }
-      }),
+      .email(USERS_MESSAGES.INVALID_EMAIL_FORMAT)
+      .nonempty(USERS_MESSAGES.EMAIL_CANNOT_BE_EMPTY)
+      .trim(), // Xóa khoảng trắng ở đầu và cuối
     password: z
       .string({
-        required_error: 'Password is required'
+        required_error: USERS_MESSAGES.PASSWORD_REQUIRED
       })
-      .min(8, 'Password is too short')
-      .max(255, 'Password is too long')
-      .nonempty('Password cannot be empty')
+      .min(8, USERS_MESSAGES.PASSWORD_TOO_SHORT)
+      .max(255, USERS_MESSAGES.PASSWORD_TOO_LONG)
+      .nonempty(USERS_MESSAGES.PASSWORD_CANNOT_BE_EMPTY)
       .trim(), // Xóa khoảng trắng ở đầu và cuối
     dateOfBirth: z
-      .string({ required_error: 'Date of birth is required' })
+      .string({ required_error: USERS_MESSAGES.DATE_REQUIRED })
       .refine((dateOfBirth) => !isNaN(Date.parse(dateOfBirth)), {
-        message: 'Invalid date format. Must be ISO-8601 (YYYY-MM-DD)'
+        message: USERS_MESSAGES.INVALID_DATE_FORMAT
       })
       .transform((val) => new Date(`${val}T00:00:00.000Z`)),
     confirm_password: z
       .string({
-        required_error: 'Confirm password is required'
+        required_error: USERS_MESSAGES.CONFIRM_PASSWORD_REQUIRED
       })
-      .min(8, 'Confirm password is too short')
-      .max(255, 'Confirm password is too long')
+      .min(8, USERS_MESSAGES.CONFIRM_PASSWORD_TOO_SHORT)
+      .max(255, USERS_MESSAGES.CONFIRM_PASSWORD_TOO_LONG)
+      .nonempty(USERS_MESSAGES.CONFIRM_PASSWORD_CANNOT_BE_EMPTY)
   })
   .refine((data) => data.password === data.confirm_password, {
-    message: 'Confirm password is not match',
+    message: USERS_MESSAGES.CONFIRM_PASSWORD_NOT_MATCH,
     path: ['confirm_password']
   })
 
 export const UserLoginSchema = z.object({
   email: z
     .string({
-      required_error: 'Email is required'
+      required_error: USERS_MESSAGES.EMAIL_REQUIRED
     })
-    .email('Invalid email format')
-    .nonempty('Email cannot be empty')
-    .trim()
-    .superRefine(async (email) => {
-      const isExist = await usersService.checkEmailExist(email)
-      if (!isExist) {
-        throw new ErrorWithStatus({
-          message: 'Email does not exist',
-          status: HTTP_STATUS.UNAUTHORIZED
-        })
-      }
-    }),
+    .email(USERS_MESSAGES.INVALID_EMAIL_FORMAT)
+    .nonempty(USERS_MESSAGES.EMAIL_CANNOT_BE_EMPTY)
+    .trim(),
   password: z
     .string({
-      required_error: 'Password is required'
+      required_error: USERS_MESSAGES.PASSWORD_REQUIRED
     })
-    .min(8, 'Length password is less 8')
-    .max(255, 'Length password is more 255')
+    .min(8, USERS_MESSAGES.PASSWORD_TOO_SHORT)
+    .max(255, USERS_MESSAGES.PASSWORD_TOO_LONG)
 })

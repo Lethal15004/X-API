@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from 'express'
 
-// Error constants
+// Constants
 import HTTP_STATUS from '~/constants/httpStatus'
 
-// Error models
+// Models
 import { ErrorEntity } from '~/models/Errors'
 
 const defaultErrorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {

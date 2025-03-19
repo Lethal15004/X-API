@@ -1,13 +1,8 @@
 import { Request, Response, NextFunction } from 'express'
 import { ZodSchema, ZodError } from 'zod'
 
-import { omit } from 'lodash'
-
-// Error class
-import { ErrorWithStatus, ErrorEntity } from '~/models/Errors'
-
-// Constants
-import HTTP_STATUS from '~/constants/httpStatus'
+// Models
+import { ErrorEntity } from '~/models/Errors'
 
 /**
  * Middleware run validation by Zod
@@ -20,9 +15,7 @@ export const validateRequest =
       const result = await schema.parseAsync(req[source])
       next()
     } catch (error) {
-      if (error instanceof ErrorWithStatus && error.getStatus() === HTTP_STATUS.UNAUTHORIZED) {
-        next(error)
-      } else if (error instanceof ZodError) {
+      if (error instanceof ZodError) {
         const entityError = new ErrorEntity({ errors: {} })
         for (const tmp of error.issues) {
           entityError.errors[tmp.path[0]] = {
