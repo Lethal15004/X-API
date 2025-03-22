@@ -1,19 +1,35 @@
 import { Router } from 'express'
+import container from '~/container'
 const router: Router = Router()
+
+// Controllers
+import { UserController } from '~/controllers/users.controllers'
+
+// Middlewares
+import { UserMiddleware } from '~/middlewares/users.middlewares'
 
 // Schemas
 import { UserRegisterSchema, UserLoginSchema } from '~/models/schemas/users.schemas'
 
-// Middlewares
-import validateRequest from '~/middlewares/validateRequest.middlewares'
-
-// Controllers
-import * as usersControllers from '~/controllers/users.controllers'
-
 // Utils
 import wrapHandler from '~/utils/handlers'
 
-router.post('/register', validateRequest(UserRegisterSchema, 'body'), wrapHandler(usersControllers.register))
-router.post('/login', validateRequest(UserLoginSchema, 'body'), wrapHandler(usersControllers.login))
+// Get controllers and middlewares
+const userController = container.get<UserController>(UserController)
+const userMiddleware = container.get<UserMiddleware>(UserMiddleware)
+
+router.post(
+  '/register',
+  userMiddleware.loginAndRegisterValidator(UserRegisterSchema, 'body'),
+  wrapHandler(userController.register)
+)
+
+router.post(
+  '/login',
+  userMiddleware.loginAndRegisterValidator(UserLoginSchema, 'body'),
+  wrapHandler(userController.login)
+)
+
+router.post('/logout', userMiddleware.authMiddleware, wrapHandler(userController.logout))
 
 export default router

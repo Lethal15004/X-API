@@ -1,13 +1,15 @@
 import { z } from 'zod'
+import jwt, { decode, SignOptions } from 'jsonwebtoken'
+
 // Models
 import { UserRegisterSchema, UserLoginSchema } from './models/schemas/users.schemas'
 
 // Models prisma
-import { Users } from '@prisma/client'
+import { Users, RefreshTokens } from '@prisma/client'
 
 declare global {
   // Type Error
-  type ErrorType = 'EMAIL_EXISTS' | 'EMAIL_NOT_EXISTS' | 'PASSWORD_INCORRECT'
+  type ErrorType = 'EMAIL_EXISTS' | 'EMAIL_NOT_EXISTS' | 'PASSWORD_INCORRECT' | 'UNAUTHORIZED' | 'INVALID_TOKEN'
 
   // Type Request
   type UserRegisterBody = z.infer<typeof UserRegisterSchema>
@@ -15,5 +17,11 @@ declare global {
 
   // Type Model
   type UserModel = Users
+  type RefreshTokenModel = RefreshTokens
+}
+declare module 'express' {
+  interface Request {
+    decoded_authorization?: jwt.JwtPayload
+  }
 }
 export {}

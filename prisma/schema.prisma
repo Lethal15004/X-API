@@ -28,4 +28,14 @@ model Users {
   username             String @unique @default(cuid())
   avatar               String @default("")
   coverPhoto           String @default("")
+  refreshTokens        Refresh_Tokens[]
+}
+
+model Refresh_Tokens{
+  id                   String @id @map("_id") @default(auto()) @db.ObjectId
+  token                String
+  createdAt            DateTime @default(now())
+  expiresAt            DateTime @db.Timestamp() @map("expiresAt")
+  user_id              String @db.ObjectId
+  user                 Users @relation(fields: [user_id],references: [id])
 }

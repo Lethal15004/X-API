@@ -9,6 +9,8 @@
     "strict": true /* Enable all strict type-checking options. */,
     "skipLibCheck": true /* Skip type checking all .d.ts files. */,
     "baseUrl": ".", // Đường dẫn base cho các import
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
     "paths": {
       "~/*": ["src/*"] // Đường dẫn tương đối cho các import (alias)
     }

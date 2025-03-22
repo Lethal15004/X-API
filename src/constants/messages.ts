@@ -1,4 +1,5 @@
 const USERS_MESSAGES = {
+  UNAUTHORIZED_ERROR: 'Unauthorized',
   VALIDATION_ERROR: 'Validation error',
 
   // Users
@@ -38,7 +39,11 @@ const USERS_MESSAGES = {
 
   // JSON
   LOGIN_SUCCESS: 'Login success',
-  REGISTER_SUCCESS: 'Register success'
+  REGISTER_SUCCESS: 'Register success',
+  LOGOUT_SUCCESS: 'Logout success',
+
+  // Token
+  INVALID_TOKEN: 'Invalid token'
 } as const
 
 export default USERS_MESSAGES

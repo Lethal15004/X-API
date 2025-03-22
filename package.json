@@ -21,9 +21,11 @@
     "bcrypt": "^5.1.1",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "inversify": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
     "mongodb": "^6.14.2",
+    "reflect-metadata": "^0.2.2",
     "zod": "^3.24.2"
   },
   "devDependencies": {

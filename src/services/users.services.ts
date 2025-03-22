@@ -1,5 +1,4 @@
-// BaseService
-import { BaseService } from './base.services'
+import { injectable, inject } from 'inversify'
 import { omit } from 'lodash'
 
 // Schemas
@@ -7,16 +6,19 @@ import { UserRegisterSchema, UserLoginSchema } from '~/models/schemas/users.sche
 
 // Utils
 import * as bcryptPassword from '~/utils/bcrypt.utils'
-import * as jwtToken from '~/utils/jwt.utils'
 import throwErrors from '~/utils/throwErrors.utils'
 
 // Constants
-import { TokenType } from '~/constants/enums'
+import { TYPES_SERVICE } from '~/constants/types'
+
+// Interfaces
+import { IUserService } from '~/interfaces/IUserService'
+import { IAuthService } from '~/interfaces/IAuthService'
+import { IPrismaService } from '~/interfaces/IPrismaService'
 
 // Class Service
-export class UsersService extends BaseService {
-  private static instance: UsersService
-
+@injectable()
+export class UserService implements IUserService {
   private readonly DEFAULT_USER_DATA = {
     bio: '',
     location: '',
@@ -27,18 +29,12 @@ export class UsersService extends BaseService {
     forgotPasswordToken: '',
     verifyStatus: 0
   }
+  private readonly REFRESH_TOKEN_EXPIRES = 100 * 24 * 60 * 60 * 1000
 
-  private constructor() {
-    super()
-  }
-
-  // Singleton
-  public static getInstance(): UsersService {
-    if (!UsersService.instance) {
-      UsersService.instance = new UsersService()
-    }
-    return UsersService.instance
-  }
+  constructor(
+    @inject(TYPES_SERVICE.PrismaService) private readonly PrismaService: IPrismaService,
+    @inject(TYPES_SERVICE.AuthService) private readonly AuthService: IAuthService
+  ) {}
 
   public async register(user: UserRegisterBody): Promise<{
     user: UserModel
@@ -56,13 +52,19 @@ export class UsersService extends BaseService {
       ...this.DEFAULT_USER_DATA,
       password: bcryptPassword.hashPassword(validateUser.password)
     }
-    const newUser = await this.prisma.users.create({
-      data: userData
-    })
+    const newUser = await this.PrismaService.create<UserModel>('users', userData)
     const [accessToken, refreshToken] = await Promise.all([
-      this.signAccessToken(newUser.id),
-      this.signRefreshToken(newUser.id)
+      this.AuthService.signAccessToken(newUser.id),
+      this.AuthService.signRefreshToken(newUser.id)
     ])
+
+    const refreshTokenData = {
+      expiresAt: new Date(Date.now() + this.REFRESH_TOKEN_EXPIRES),
+      token: refreshToken,
+      user_id: newUser.id
+    }
+    // Insert refresh token
+    await this.PrismaService.create<RefreshTokenModel>('refresh_Tokens', refreshTokenData)
     return {
       user: newUser,
       accessToken,
@@ -87,9 +89,17 @@ export class UsersService extends BaseService {
       throwErrors('PASSWORD_INCORRECT')
     }
     const [accessToken, refreshToken] = await Promise.all([
-      this.signAccessToken(userExist!.id),
-      this.signRefreshToken(userExist!.id)
+      this.AuthService.signAccessToken(userExist!.id),
+      this.AuthService.signRefreshToken(userExist!.id)
     ])
+
+    // Insert refresh token
+    const refreshTokenData = {
+      expiresAt: new Date(Date.now() + this.REFRESH_TOKEN_EXPIRES),
+      token: refreshToken,
+      user_id: userExist!.id
+    }
+    await this.PrismaService.create<RefreshTokenModel>('refresh_Tokens', refreshTokenData)
     return {
       user: userExist!,
       accessToken,
@@ -97,36 +107,8 @@ export class UsersService extends BaseService {
     }
   }
 
-  private async signAccessToken(userId: string): Promise<string> {
-    return jwtToken.signToken({
-      payload: {
-        userId,
-        token_type: TokenType.AccessToken
-      },
-      options: {
-        expiresIn: '15m'
-      }
-    })
-  }
-
-  private async signRefreshToken(userId: string): Promise<string> {
-    return jwtToken.signToken({
-      payload: {
-        userId,
-        token_type: TokenType.RefreshToken
-      },
-      options: {
-        expiresIn: '100d'
-      }
-    })
-  }
-
   public async checkEmailExist(email: string): Promise<UserModel | null> {
-    const userExist = await this.prisma.users.findUnique({
-      where: { email }
-    })
-    if (userExist) return userExist
-    return null
+    return this.PrismaService.findOne<UserModel>('users', { email })
   }
 
   public async checkPassword(password: string, userExist: UserModel): Promise<boolean> {
