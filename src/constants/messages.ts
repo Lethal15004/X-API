@@ -42,8 +42,14 @@ const USERS_MESSAGES = {
   REGISTER_SUCCESS: 'Register success',
   LOGOUT_SUCCESS: 'Logout success',
 
-  // Token
-  INVALID_TOKEN: 'Invalid token'
+  // Access token
+  ACCESS_TOKEN_REQUIRED: 'Access token is required',
+  INVALID_ACCESS_TOKEN: 'Invalid access token',
+
+  // Refresh token
+  REFRESH_TOKEN_REQUIRED: 'Refresh token is required',
+  INVALID_REFRESH_TOKEN: 'Invalid refresh token',
+  USED_REFRESH_TOKEN_OR_NOT_EXISTS: 'Used refresh token or not exists'
 } as const
 
 export default USERS_MESSAGES

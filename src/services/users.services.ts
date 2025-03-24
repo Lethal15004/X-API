@@ -7,9 +7,11 @@ import { UserRegisterSchema, UserLoginSchema } from '~/models/schemas/users.sche
 // Utils
 import * as bcryptPassword from '~/utils/bcrypt.utils'
 import throwErrors from '~/utils/throwErrors.utils'
+import { validateUser } from '~/utils/validate'
 
 // Constants
 import { TYPES_SERVICE } from '~/constants/types'
+import { TokenType } from '~/constants/enums'
 
 // Interfaces
 import { IUserService } from '~/interfaces/IUserService'
@@ -41,30 +43,25 @@ export class UserService implements IUserService {
     accessToken: string
     refreshToken: string
   }> {
-    const validateUser = await UserRegisterSchema.parseAsync(user)
+    // Validate user
+    const validatedUser = await validateUser<UserRegisterBody>(UserRegisterSchema, user)
+    // Check if email already exists
     const isExist = await this.checkEmailExist(user.email)
     // Throw error if email already exists
     if (isExist) {
       throwErrors('EMAIL_EXISTS')
     }
     const userData = {
-      ...omit(validateUser, ['confirm_password']),
+      ...omit(validatedUser, ['confirm_password']),
       ...this.DEFAULT_USER_DATA,
-      password: bcryptPassword.hashPassword(validateUser.password)
+      password: bcryptPassword.hashPassword(validatedUser.password)
     }
     const newUser = await this.PrismaService.create<UserModel>('users', userData)
-    const [accessToken, refreshToken] = await Promise.all([
-      this.AuthService.signAccessToken(newUser.id),
-      this.AuthService.signRefreshToken(newUser.id)
-    ])
 
-    const refreshTokenData = {
-      expiresAt: new Date(Date.now() + this.REFRESH_TOKEN_EXPIRES),
-      token: refreshToken,
-      user_id: newUser.id
-    }
+    const { accessToken, refreshToken } = await this.createTokens(newUser.id)
+
     // Insert refresh token
-    await this.PrismaService.create<RefreshTokenModel>('refresh_Tokens', refreshTokenData)
+    await this.saveRefreshToken(refreshToken, newUser.id)
     return {
       user: newUser,
       accessToken,
@@ -77,29 +74,19 @@ export class UserService implements IUserService {
     accessToken: string
     refreshToken: string
   }> {
-    const validateUser = await UserLoginSchema.parseAsync(user)
+    const validatedUser = await validateUser<UserLoginBody>(UserLoginSchema, user)
     const userExist = await this.checkEmailExist(user.email)
     // Throw error if email already exists
     if (!userExist) {
       throwErrors('EMAIL_NOT_EXISTS')
     }
-    const checkPassword = await this.checkPassword(validateUser.password, userExist!)
-    // Throw error if password is incorrect
-    if (!checkPassword) {
-      throwErrors('PASSWORD_INCORRECT')
-    }
-    const [accessToken, refreshToken] = await Promise.all([
-      this.AuthService.signAccessToken(userExist!.id),
-      this.AuthService.signRefreshToken(userExist!.id)
-    ])
+    // Check password
+    await this.checkPassword(validatedUser.password, userExist!)
 
+    const { accessToken, refreshToken } = await this.createTokens(userExist!.id)
     // Insert refresh token
-    const refreshTokenData = {
-      expiresAt: new Date(Date.now() + this.REFRESH_TOKEN_EXPIRES),
-      token: refreshToken,
-      user_id: userExist!.id
-    }
-    await this.PrismaService.create<RefreshTokenModel>('refresh_Tokens', refreshTokenData)
+    await this.saveRefreshToken(refreshToken, userExist!.id)
+
     return {
       user: userExist!,
       accessToken,
@@ -107,11 +94,42 @@ export class UserService implements IUserService {
     }
   }
 
-  public async checkEmailExist(email: string): Promise<UserModel | null> {
-    return this.PrismaService.findOne<UserModel>('users', { email })
+  public async logout(refreshToken: string): Promise<void> {
+    await this.PrismaService.deleteMany('refresh_Tokens', { token: refreshToken })
   }
 
-  public async checkPassword(password: string, userExist: UserModel): Promise<boolean> {
-    return bcryptPassword.verifyPassword(password, userExist.password)
+  // Functions help for service
+  private async checkEmailExist(email: string): Promise<UserModel | null> {
+    const isExist = await this.PrismaService.findUnique<UserModel>('users', { email })
+    return isExist
+  }
+
+  private async checkPassword(password: string, userExist: UserModel): Promise<void> {
+    const isMatch = bcryptPassword.verifyPassword(password, userExist.password)
+    if (!isMatch) {
+      throwErrors('PASSWORD_INCORRECT')
+    }
+  }
+
+  private async createTokens(userId: string): Promise<{ accessToken: string; refreshToken: string }> {
+    const [accessToken, refreshToken] = await Promise.all([
+      this.AuthService.signAccessToken({
+        userId,
+        tokenType: TokenType.AccessToken
+      }),
+      this.AuthService.signRefreshToken({
+        userId,
+        tokenType: TokenType.RefreshToken
+      })
+    ])
+    return { accessToken, refreshToken }
+  }
+
+  private async saveRefreshToken(refreshToken: string, userId: string): Promise<void> {
+    await this.PrismaService.create<RefreshTokenModel>('refresh_Tokens', {
+      expiresAt: new Date(Date.now() + this.REFRESH_TOKEN_EXPIRES),
+      token: refreshToken,
+      userId
+    })
   }
 }

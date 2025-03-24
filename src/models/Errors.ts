@@ -24,6 +24,12 @@ export class ErrorWithStatus {
   public getStatus() {
     return this.status
   }
+  public setMessage(message: string) {
+    this.message = message
+  }
+  public setStatus(status: number) {
+    this.status = status
+  }
 }
 export class ErrorEntity extends ErrorWithStatus {
   errors: ErrorsType

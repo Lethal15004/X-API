@@ -8,34 +8,40 @@ export class PrismaService implements IPrismaService {
   constructor() {
     this.prisma = new PrismaClient()
   }
-  public async findOne<T>(model: string, where: any): Promise<T | null> {
+  public async findUnique<T>(model: string, where: any): Promise<T | null> {
     this.checkModelExist(model)
-    return (await (this.prisma as any)[model].findUnique({
+    return (this.prisma as any)[model].findUnique({
       where
-    })) as Promise<T | null>
+    }) as Promise<T | null>
+  }
+  public async findFirst<T>(model: string, where: any): Promise<T | null> {
+    this.checkModelExist(model)
+    return (this.prisma as any)[model].findFirst({
+      where
+    }) as Promise<T | null>
   }
   public async findMany<T>(model: string, where?: any): Promise<T[]> {
     this.checkModelExist(model)
-    return (await (this.prisma as any)[model].findMany({
+    return (this.prisma as any)[model].findMany({
       where
-    })) as Promise<T[]>
+    }) as Promise<T[]>
   }
   public async create<T>(model: string, data: any): Promise<T> {
     this.checkModelExist(model)
-    return (await (this.prisma as any)[model].create({
+    return (this.prisma as any)[model].create({
       data
-    })) as T
+    }) as Promise<T>
   }
   public async update<T>(model: string, where: any, data: any): Promise<T> {
     this.checkModelExist(model)
-    return (await (this.prisma as any)[model].update({
+    return (this.prisma as any)[model].update({
       where,
       data
-    })) as Promise<T>
+    }) as Promise<T>
   }
-  public async delete(model: string, where: any): Promise<void> {
+  public async deleteMany(model: string, where: any): Promise<void> {
     this.checkModelExist(model)
-    return await (this.prisma as any)[model].update({
+    await (this.prisma as any)[model].deleteMany({
       where
     })
   }

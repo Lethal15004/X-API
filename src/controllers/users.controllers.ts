@@ -31,14 +31,19 @@ export class UserController {
     const userExist = await this.UserService.login(req.body)
     if (userExist) {
       res.status(200).json({
-        message: USERS_MESSAGES.LOGIN_SUCCESS
+        message: USERS_MESSAGES.LOGIN_SUCCESS,
+        id: userExist.user.id,
+        accessToken: userExist.accessToken,
+        refreshToken: userExist.refreshToken
       })
     } else {
       res.status(400).json({ message: 'User login failed' })
     }
   }
 
-  public logout = (req: Request, res: Response) => {
+  public logout = async (req: Request<ParamsDictionary, any, UserLogoutBody>, res: Response) => {
+    const { refreshToken } = req.body
+    await this.UserService.logout(refreshToken)
     res.status(200).json({
       message: USERS_MESSAGES.LOGOUT_SUCCESS
     })

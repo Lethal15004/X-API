@@ -20,16 +20,21 @@ const userMiddleware = container.get<UserMiddleware>(UserMiddleware)
 
 router.post(
   '/register',
-  userMiddleware.loginAndRegisterValidator(UserRegisterSchema, 'body'),
+  wrapHandler(userMiddleware.loginAndRegisterValidator(UserRegisterSchema, 'body')),
   wrapHandler(userController.register)
 )
 
 router.post(
   '/login',
-  userMiddleware.loginAndRegisterValidator(UserLoginSchema, 'body'),
+  wrapHandler(userMiddleware.loginAndRegisterValidator(UserLoginSchema, 'body')),
   wrapHandler(userController.login)
 )
 
-router.post('/logout', userMiddleware.authMiddleware, wrapHandler(userController.logout))
+router.post(
+  '/logout',
+  wrapHandler(userMiddleware.accessTokenValidator),
+  wrapHandler(userMiddleware.refreshTokenValidator),
+  wrapHandler(userController.logout)
+)
 
 export default router
