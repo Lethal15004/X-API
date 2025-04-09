@@ -3,6 +3,10 @@ import USERS_MESSAGES from '~/constants/messages'
 import HTTP_STATUS from '~/constants/httpStatus'
 
 export const errorMap = {
+  USER_NOT_FOUND: {
+    message: USERS_MESSAGES.USER_NOT_FOUND,
+    status: HTTP_STATUS.NOT_FOUND
+  },
   EMAIL_EXISTS: {
     message: USERS_MESSAGES.EMAIL_ALREADY_EXISTS,
     status: HTTP_STATUS.UNAUTHORIZED
@@ -38,5 +42,9 @@ export const errorMap = {
   USED_REFRESH_TOKEN_OR_NOT_EXISTS: {
     message: USERS_MESSAGES.USED_REFRESH_TOKEN_OR_NOT_EXISTS,
     status: HTTP_STATUS.UNAUTHORIZED
+  },
+  EMAIL_ALREADY_VERIFIED_BEFORE: {
+    message: USERS_MESSAGES.EMAIL_ALREADY_VERIFIED_BEFORE,
+    status: HTTP_STATUS.OK
   }
 } as const

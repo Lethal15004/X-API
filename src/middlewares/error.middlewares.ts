@@ -18,7 +18,6 @@ const defaultErrorHandler = (
       errors: err instanceof ErrorEntity ? err.getErrors() : undefined
     })
   } else {
-    console.log(err)
     res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
       message: err.message || 'Some thing went wrong'
     })

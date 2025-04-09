@@ -1,22 +1,19 @@
 import { injectable, inject } from 'inversify'
 import { omit } from 'lodash'
 
-// Schemas
-import { UserRegisterSchema, UserLoginSchema } from '~/models/schemas/users.schemas'
-
 // Utils
 import * as bcryptPassword from '~/utils/bcrypt.utils'
 import throwErrors from '~/utils/throwErrors.utils'
-import { validateUser } from '~/utils/validate'
 
 // Constants
 import { TYPES_SERVICE } from '~/constants/types'
-import { TokenType } from '~/constants/enums'
+import { TokenType, UserVerifyStatus } from '~/constants/enums'
 
 // Interfaces
 import { IUserService } from '~/interfaces/IUserService'
 import { IAuthService } from '~/interfaces/IAuthService'
 import { IPrismaService } from '~/interfaces/IPrismaService'
+import { ObjectId } from 'mongodb'
 
 // Class Service
 @injectable()
@@ -43,18 +40,23 @@ export class UserService implements IUserService {
     accessToken: string
     refreshToken: string
   }> {
-    // Validate user
-    const validatedUser = await validateUser<UserRegisterBody>(UserRegisterSchema, user)
     // Check if email already exists
     const isExist = await this.checkEmailExist(user.email)
     // Throw error if email already exists
     if (isExist) {
       throwErrors('EMAIL_EXISTS')
     }
+    const userId = new ObjectId()
+    const emailVerifiedToken = await this.AuthService.signEmailVerifyToken({
+      userId: userId.toString(),
+      tokenType: TokenType.EmailVerifyToken
+    })
     const userData = {
-      ...omit(validatedUser, ['confirm_password']),
+      ...omit(user, ['confirm_password']),
       ...this.DEFAULT_USER_DATA,
-      password: bcryptPassword.hashPassword(validatedUser.password)
+      id: userId,
+      emailVerifiedToken: emailVerifiedToken,
+      password: bcryptPassword.hashPassword(user.password)
     }
     const newUser = await this.PrismaService.create<UserModel>('users', userData)
 
@@ -74,14 +76,14 @@ export class UserService implements IUserService {
     accessToken: string
     refreshToken: string
   }> {
-    const validatedUser = await validateUser<UserLoginBody>(UserLoginSchema, user)
     const userExist = await this.checkEmailExist(user.email)
     // Throw error if email already exists
     if (!userExist) {
       throwErrors('EMAIL_NOT_EXISTS')
     }
+
     // Check password
-    await this.checkPassword(validatedUser.password, userExist!)
+    this.checkPassword(user.password, userExist!)
 
     const { accessToken, refreshToken } = await this.createTokens(userExist!.id)
     // Insert refresh token
@@ -94,8 +96,40 @@ export class UserService implements IUserService {
     }
   }
 
-  public async logout(refreshToken: string): Promise<void> {
+  public async logout(refreshToken: string): Promise<boolean> {
     await this.PrismaService.deleteMany('refresh_Tokens', { token: refreshToken })
+    return true
+  }
+
+  public async emailVerify(decoded_email_verify_token: TokenPayload): Promise<{
+    accessToken: string
+    refreshToken: string
+  }> {
+    const { userId } = decoded_email_verify_token
+
+    const user = await this.PrismaService.findUnique<UserModel>('users', { id: userId })
+    // Check user is exist
+    if (!user) {
+      throwErrors('USER_NOT_FOUND')
+    }
+    // If email verified
+    if (user?.emailVerifiedToken === '') {
+      throwErrors('EMAIL_ALREADY_VERIFIED_BEFORE')
+    }
+
+    const [token] = await Promise.all([
+      this.createTokens(userId),
+      await this.PrismaService.update<UserModel>(
+        'users',
+        { id: userId },
+        { emailVerifiedToken: '', verifyStatus: UserVerifyStatus.Verified }
+      )
+    ])
+    const { accessToken, refreshToken } = token
+    return {
+      accessToken,
+      refreshToken
+    }
   }
 
   // Functions help for service
@@ -104,7 +138,7 @@ export class UserService implements IUserService {
     return isExist
   }
 
-  private async checkPassword(password: string, userExist: UserModel): Promise<void> {
+  private checkPassword(password: string, userExist: UserModel): void {
     const isMatch = bcryptPassword.verifyPassword(password, userExist.password)
     if (!isMatch) {
       throwErrors('PASSWORD_INCORRECT')

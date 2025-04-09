@@ -18,9 +18,9 @@ const wrapHandler = (fn: RequestHandler) => {
           }
         }
         next(entityError)
-        return
+      } else {
+        next(error)
       }
-      next(error)
     }
   }
 }

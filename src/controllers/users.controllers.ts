@@ -23,7 +23,7 @@ export class UserController {
         refreshToken: userExist.refreshToken
       })
     } else {
-      res.status(400).json({ message: 'User registered failed' })
+      res.status(400).json({ message: USERS_MESSAGES.REGISTER_FAILED })
     }
   }
 
@@ -37,15 +37,32 @@ export class UserController {
         refreshToken: userExist.refreshToken
       })
     } else {
-      res.status(400).json({ message: 'User login failed' })
+      res.status(400).json({ message: USERS_MESSAGES.LOGIN_FAILED })
     }
   }
 
   public logout = async (req: Request<ParamsDictionary, any, UserLogoutBody>, res: Response) => {
     const { refreshToken } = req.body
-    await this.UserService.logout(refreshToken)
-    res.status(200).json({
-      message: USERS_MESSAGES.LOGOUT_SUCCESS
-    })
+    const result = await this.UserService.logout(refreshToken)
+    if (result) {
+      res.status(200).json({
+        message: USERS_MESSAGES.LOGOUT_SUCCESS
+      })
+    } else {
+      res.status(400).json({ message: USERS_MESSAGES.LOGOUT_FAILED })
+    }
+  }
+
+  public emailVerify = async (req: Request<ParamsDictionary, any, UserVerifyEmailBody>, res: Response) => {
+    const result = await this.UserService.emailVerify(req.decoded_email_verify_token as TokenPayload)
+    if (result) {
+      res.status(200).json({
+        message: USERS_MESSAGES.VERIFIED_EMAIL_SUCCESS,
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken
+      })
+    } else {
+      res.status(400).json({ message: USERS_MESSAGES.VERIFIED_EMAIL_FAILED })
+    }
   }
 }

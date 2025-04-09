@@ -5,7 +5,12 @@ import jwt, { decode, SignOptions } from 'jsonwebtoken'
 import { TokenType } from './constants/enums'
 
 // Models
-import { UserRegisterSchema, UserLoginSchema } from './models/schemas/users.schemas'
+import {
+  UserRegisterSchema,
+  UserLoginSchema,
+  UserLogoutSchema,
+  UserVerifyEmailSchema
+} from './models/schemas/users.schemas'
 
 // Models prisma
 import { Users, RefreshTokens } from '@prisma/client'
@@ -13,6 +18,7 @@ import { Users, RefreshTokens } from '@prisma/client'
 declare global {
   // Type Error
   type ErrorType =
+    | 'USER_NOT_FOUND'
     | 'EMAIL_EXISTS'
     | 'EMAIL_NOT_EXISTS'
     | 'PASSWORD_INCORRECT'
@@ -22,16 +28,19 @@ declare global {
     | 'REFRESH_TOKEN_REQUIRED'
     | 'INVALID_REFRESH_TOKEN'
     | 'USED_REFRESH_TOKEN_OR_NOT_EXISTS'
+    | 'EMAIL_ALREADY_VERIFIED_BEFORE'
 
   // Type Request
   type UserRegisterBody = z.infer<typeof UserRegisterSchema>
   type UserLoginBody = z.infer<typeof UserLoginSchema>
+  type UserLogoutBody = {
+    refreshToken: string
+  }
+  type UserVerifyEmailBody = z.infer<typeof UserVerifyEmailSchema>
+
   type TokenPayload = jwt.JwtPayload & {
     userId: string
     tokenType: TokenType
-  }
-  type UserLogoutBody = {
-    refreshToken: string
   }
 
   // Type Model
@@ -42,6 +51,7 @@ declare module 'express' {
   interface Request {
     decoded_authorization?: TokenPayload
     decoded_refresh_token?: TokenPayload
+    decoded_email_verify_token?: TokenPayload
   }
 }
 export {}

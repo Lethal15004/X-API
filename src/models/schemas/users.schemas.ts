@@ -63,3 +63,29 @@ export const UserLoginSchema = z.object({
     .min(8, USERS_MESSAGES.PASSWORD_TOO_SHORT)
     .max(255, USERS_MESSAGES.PASSWORD_TOO_LONG)
 })
+
+export const UserLogoutSchema = z.object({
+  refreshToken: z
+    .string({
+      required_error: USERS_MESSAGES.REFRESH_TOKEN_REQUIRED
+    })
+    .nonempty(USERS_MESSAGES.REFRESH_TOKEN_REQUIRED),
+  authorization: z
+    .string({
+      required_error: USERS_MESSAGES.ACCESS_TOKEN_REQUIRED
+    })
+    .nonempty(USERS_MESSAGES.ACCESS_TOKEN_REQUIRED)
+    .regex(/^Bearer\s+/, {
+      message: USERS_MESSAGES.INVALID_ACCESS_TOKEN
+    })
+    .transform((bearer) => bearer.split(' ')[1])
+})
+
+export const UserVerifyEmailSchema = z.object({
+  emailVerifyToken: z
+    .string({
+      required_error: USERS_MESSAGES.VERIFY_EMAIL_TOKEN_REQUIRED
+    })
+    .nonempty(USERS_MESSAGES.VERIFY_EMAIL_TOKEN_REQUIRED)
+    .trim()
+})

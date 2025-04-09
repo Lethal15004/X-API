@@ -4,6 +4,8 @@ import { inject, injectable } from 'inversify'
 
 // Constants
 import { TYPES_SERVICE } from '~/constants/types'
+import { TokenType } from '~/constants/enums'
+import HTTP_STATUS from '~/constants/httpStatus'
 
 // Utils
 import throwErrors from '~/utils/throwErrors.utils'
@@ -11,6 +13,10 @@ import throwErrors from '~/utils/throwErrors.utils'
 // Interfaces
 import { IAuthService } from '~/interfaces/IAuthService'
 import { IPrismaService } from '~/interfaces/IPrismaService'
+
+// Schemas
+import { UserLogoutSchema, UserVerifyEmailSchema } from '~/models/schemas/users.schemas'
+import { ErrorWithStatus } from '~/models/Errors'
 
 /**
  * Middleware run validation by Zod
@@ -23,54 +29,67 @@ export class UserMiddleware {
     @inject(TYPES_SERVICE.PrismaService) private readonly PrismaService: IPrismaService
   ) {}
 
-  public loginAndRegisterValidator = (schema: ZodSchema, source: 'body' | 'query' | 'params' = 'body') => {
-    return (req: Request, res: Response, next: NextFunction) => {
-      schema.parseAsync(req[source])
-      next()
-    }
-  }
-
-  public accessTokenValidator = async (req: Request, res: Response, next: NextFunction) => {
-    const authHeader = req.headers.authorization
-    if (!authHeader || !authHeader.startsWith('Bearer')) {
-      throwErrors('UNAUTHORIZED')
-      return
-    }
-    const accessToken = authHeader?.split(' ')[1]
-    if (!accessToken) {
-      throwErrors('ACCESS_TOKEN_REQUIRED')
-      return
-    }
-    try {
-      const decoded_authorization = await this.AuthService.verifyToken(accessToken as string)
-      req.decoded_authorization = decoded_authorization
-      next()
-    } catch (error) {
-      throwErrors('INVALID_ACCESS_TOKEN')
-    }
-  }
-
-  public refreshTokenValidator = async (req: Request, res: Response, next: NextFunction) => {
-    const refreshToken = req.body.refreshToken
-    if (!refreshToken) {
-      throwErrors('REFRESH_TOKEN_REQUIRED')
-      return
-    }
-    try {
-      const [decoded_refresh_token, refresh_token] = await Promise.all([
-        this.AuthService.verifyToken(refreshToken as string),
-        this.PrismaService.findFirst<RefreshTokenModel>('refresh_Tokens', {
-          token: refreshToken
-        })
-      ])
-      req.decoded_refresh_token = decoded_refresh_token
-      if (!refresh_token) {
-        throwErrors('USED_REFRESH_TOKEN_OR_NOT_EXISTS')
-        return
+  public Validator = (schema: ZodSchema, source: 'body' | 'query' | 'params' | 'headers' = 'body') => {
+    return async (req: Request, res: Response, next: NextFunction) => {
+      switch (schema) {
+        case UserLogoutSchema: {
+          const { authorization } = req.headers
+          const { refreshToken } = req[source]
+          const rs = await schema.safeParseAsync({ authorization, refreshToken })
+          if (!rs.success) {
+            throw new ErrorWithStatus({
+              message: rs.error.errors[0].message as string,
+              status: HTTP_STATUS.UNAUTHORIZED
+            }) // Quăng lỗi đầu tiên
+          }
+          const [decoded_authorization, decoded_refreshToken, isExist] = await this.decodeAccessRefreshToken(
+            rs.data.authorization,
+            rs.data.refreshToken
+          )
+          if (isExist) {
+            req.decoded_refresh_token = decoded_refreshToken
+            req.decoded_authorization = decoded_authorization
+            next()
+          } else {
+            throwErrors('USED_REFRESH_TOKEN_OR_NOT_EXISTS')
+          }
+          break
+        }
+        case UserVerifyEmailSchema: {
+          const { emailVerifyToken } = req[source]
+          const rs = await schema.safeParseAsync({ emailVerifyToken })
+          if (!rs.success) {
+            throw new ErrorWithStatus({
+              message: rs.error.errors[0].message as string,
+              status: HTTP_STATUS.UNAUTHORIZED
+            }) // Quăng lỗi đầu tiên
+          }
+          const decoded_email_verify_token = await this.decodeEmailVerifyToken(rs.data.emailVerifyToken)
+          req.decoded_email_verify_token = decoded_email_verify_token
+          next()
+          break
+        }
+        default: {
+          req.body = await schema.parseAsync(req[source])
+          next()
+          break
+        }
       }
-      next()
-    } catch (error) {
-      throwErrors('INVALID_REFRESH_TOKEN')
     }
+  }
+
+  private async decodeAccessRefreshToken(
+    authorization: string,
+    refreshToken: string
+  ): Promise<[TokenPayload, TokenPayload, RefreshTokenModel | null]> {
+    return await Promise.all([
+      this.AuthService.verifyToken(authorization as string, TokenType.AccessToken),
+      this.AuthService.verifyToken(refreshToken, TokenType.RefreshToken),
+      this.PrismaService.findFirst<RefreshTokenModel>('refresh_Tokens', { token: refreshToken })
+    ])
+  }
+
+  private async decodeEmailVerifyToken(emailVerifyToken: string): Promise<TokenPayload> {
+    return await this.AuthService.verifyToken(emailVerifyToken as string, TokenType.EmailVerifyToken)
   }
 }

@@ -1,4 +1,5 @@
 const USERS_MESSAGES = {
+  // Error
   UNAUTHORIZED_ERROR: 'Unauthorized',
   VALIDATION_ERROR: 'Validation error',
 
@@ -38,9 +39,12 @@ const USERS_MESSAGES = {
   EMAIL_CANNOT_BE_EMPTY: 'Email cannot be empty',
 
   // JSON
-  LOGIN_SUCCESS: 'Login success',
-  REGISTER_SUCCESS: 'Register success',
-  LOGOUT_SUCCESS: 'Logout success',
+  LOGIN_SUCCESS: 'User login success',
+  REGISTER_SUCCESS: 'User register success',
+  LOGOUT_SUCCESS: 'User logout success',
+  LOGIN_FAILED: 'User login failed',
+  REGISTER_FAILED: 'User register failed',
+  LOGOUT_FAILED: 'User logout failed',
 
   // Access token
   ACCESS_TOKEN_REQUIRED: 'Access token is required',
@@ -49,7 +53,14 @@ const USERS_MESSAGES = {
   // Refresh token
   REFRESH_TOKEN_REQUIRED: 'Refresh token is required',
   INVALID_REFRESH_TOKEN: 'Invalid refresh token',
-  USED_REFRESH_TOKEN_OR_NOT_EXISTS: 'Used refresh token or not exists'
+  USED_REFRESH_TOKEN_OR_NOT_EXISTS: 'Used refresh token or not exists',
+
+  // Verify email token
+  VERIFY_EMAIL_TOKEN_REQUIRED: 'Verify email token is required',
+  INVALID_VERIFY_EMAIL_TOKEN: 'Invalid verify email token',
+  EMAIL_ALREADY_VERIFIED_BEFORE: 'Email already verified before',
+  VERIFIED_EMAIL_SUCCESS: 'Verified email success',
+  VERIFIED_EMAIL_FAILED: 'Verified email failed'
 } as const
 
 export default USERS_MESSAGES
