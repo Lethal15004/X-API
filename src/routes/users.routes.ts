@@ -9,7 +9,12 @@ import { UserController } from '~/controllers/users.controllers'
 import { UserMiddleware } from '~/middlewares/users.middlewares'
 
 // Schemas
-import { UserRegisterSchema, UserLoginSchema, UserForgotPasswordSchema } from '~/models/schemas/users.schemas'
+import {
+  UserRegisterSchema,
+  UserLoginSchema,
+  UserForgotPasswordSchema,
+  UserVerifyForgotPasswordSchema
+} from '~/models/schemas/users.schemas'
 
 // Utils
 import wrapHandler from '~/utils/handlers'
@@ -48,5 +53,11 @@ router.post(
   '/forgot-password',
   wrapHandler(userMiddleware.defaultValidator(UserForgotPasswordSchema)),
   wrapHandler(userController.forgotPassword)
+)
+
+router.post(
+  '/verify-forgot-password',
+  wrapHandler(userMiddleware.verifyForgotPasswordValidator()),
+  wrapHandler(userController.verifyForgotPassword)
 )
 export default router

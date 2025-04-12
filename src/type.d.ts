@@ -10,7 +10,8 @@ import {
   UserLoginSchema,
   UserLogoutSchema,
   UserVerifyEmailSchema,
-  UserForgotPasswordSchema
+  UserForgotPasswordSchema,
+  UserVerifyForgotPasswordSchema
 } from './models/schemas/users.schemas'
 
 // Models prisma
@@ -30,6 +31,7 @@ declare global {
     | 'INVALID_REFRESH_TOKEN'
     | 'USED_REFRESH_TOKEN_OR_NOT_EXISTS'
     | 'EMAIL_ALREADY_VERIFIED_BEFORE'
+    | 'INVALID_FORGOT_PASSWORD_TOKEN'
 
   // Type Request
   type UserRegisterBody = z.infer<typeof UserRegisterSchema>
@@ -39,6 +41,7 @@ declare global {
   }
   type UserVerifyEmailBody = z.infer<typeof UserVerifyEmailSchema>
   type UserForgotPasswordBody = z.infer<typeof UserForgotPasswordSchema>
+  type UserVerifyForgotPasswordBody = z.infer<typeof UserVerifyForgotPasswordSchema>
 
   type TokenPayload = jwt.JwtPayload & {
     userId: string
@@ -54,6 +57,7 @@ declare module 'express' {
     decoded_authorization?: TokenPayload
     decoded_refresh_token?: TokenPayload
     decoded_email_verify_token?: TokenPayload
+    decoded_forgot_password_verify_token?: TokenPayload
   }
 }
 export {}

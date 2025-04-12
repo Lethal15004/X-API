@@ -91,4 +91,23 @@ export class UserController {
       })
     }
   }
+
+  public verifyForgotPassword = async (
+    req: Request<ParamsDictionary, any, UserVerifyForgotPasswordBody>,
+    res: Response
+  ) => {
+    const result = await this.UserService.forgotPasswordVerify(
+      req.decoded_forgot_password_verify_token as TokenPayload,
+      req.body.forgotPasswordToken
+    )
+    if (result) {
+      res.status(HTTP_STATUS.OK).json({
+        message: USERS_MESSAGES.VERIFIED_FORGOT_PASSWORD_SUCCESS
+      })
+    } else {
+      res.status(HTTP_STATUS.BAD_REQUEST).json({
+        message: USERS_MESSAGES.VERIFIED_FORGOT_PASSWORD_FAILED
+      })
+    }
+  }
 }

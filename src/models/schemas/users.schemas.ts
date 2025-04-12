@@ -99,3 +99,12 @@ export const UserForgotPasswordSchema = z.object({
     .nonempty(USERS_MESSAGES.EMAIL_CANNOT_BE_EMPTY)
     .trim() // Xóa khoảng trắng ở đầu và cuối
 })
+
+export const UserVerifyForgotPasswordSchema = z.object({
+  forgotPasswordToken: z
+    .string({
+      required_error: USERS_MESSAGES.VERIFY_PASSWORD_TOKEN_REQUIRED
+    })
+    .nonempty(USERS_MESSAGES.VERIFY_PASSWORD_TOKEN_REQUIRED)
+    .trim() // Xóa khoảng trắng ở đầu và cuối
+})

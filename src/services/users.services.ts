@@ -47,10 +47,8 @@ export class UserService implements IUserService {
       throwErrors('EMAIL_EXISTS')
     }
     const userId = new ObjectId()
-    const emailVerifiedToken = await this.AuthService.signEmailVerifyToken({
-      userId: userId.toString(),
-      tokenType: TokenType.EmailVerifyToken
-    })
+    const emailVerifiedToken = await this.createVerifyEmailToken(userId.toString())
+
     const userData = {
       ...omit(user, ['confirm_password']),
       ...this.DEFAULT_USER_DATA,
@@ -97,6 +95,10 @@ export class UserService implements IUserService {
   }
 
   public async logout(refreshToken: string): Promise<boolean> {
+    const isExist = await this.isExistRefreshToken(refreshToken)
+    if (!isExist) {
+      throwErrors('USED_REFRESH_TOKEN_OR_NOT_EXISTS')
+    }
     await this.PrismaService.deleteMany('refresh_Tokens', { token: refreshToken })
     return true
   }
@@ -170,6 +172,22 @@ export class UserService implements IUserService {
     return true
   }
 
+  public async forgotPasswordVerify(
+    decoded_forgot_password_verify_token: TokenPayload,
+    forgotPasswordToken: string
+  ): Promise<boolean> {
+    const { userId } = decoded_forgot_password_verify_token
+    const user = await this.PrismaService.findUnique<UserModel>('users', { id: userId })
+    // Check user is exist
+    if (!user) {
+      throwErrors('USER_NOT_FOUND')
+    }
+    if (user?.forgotPasswordToken !== forgotPasswordToken) {
+      throwErrors('INVALID_FORGOT_PASSWORD_TOKEN')
+    }
+    return true
+  }
+
   // Functions help for service
   private async checkEmailExist(email: string): Promise<UserModel | null> {
     const isExist = await this.PrismaService.findUnique<UserModel>('users', { email })
@@ -219,5 +237,9 @@ export class UserService implements IUserService {
       token: refreshToken,
       userId
     })
+  }
+
+  private async isExistRefreshToken(refreshToken: string): Promise<RefreshTokenModel> {
+    return await this.PrismaService.findFirst<RefreshTokenModel>('refresh_Tokens', { token: refreshToken })
   }
 }

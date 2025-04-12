@@ -5,4 +5,8 @@ export interface IUserService {
   emailVerify(decoded_email_verify_token: TokenPayload): Promise<{ accessToken: string; refreshToken: string }>
   resendEmailVerify(decoded_authorization: TokenPayload): Promise<boolean>
   forgotPassword(email: string): Promise<boolean>
+  forgotPasswordVerify(
+    decoded_forgot_password_verify_token: TokenPayload,
+    forgotPasswordToken: string
+  ): Promise<boolean>
 }

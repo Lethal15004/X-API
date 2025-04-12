@@ -66,7 +66,11 @@ const USERS_MESSAGES = {
 
   // Forgot password token
   CHECK_EMAIL_TO_RESET_PASSWORD: 'Check email to reset password',
-  EMAIL_TO_RESET_PASSWORD_FAILED: 'Send email to reset password failed'
+  EMAIL_TO_RESET_PASSWORD_FAILED: 'Send email to reset password failed',
+  VERIFY_PASSWORD_TOKEN_REQUIRED: 'Verify password token is required',
+  INVALID_FORGOT_PASSWORD_TOKEN: 'Invalid forgot password token',
+  VERIFIED_FORGOT_PASSWORD_SUCCESS: 'Verified forgot password success',
+  VERIFIED_FORGOT_PASSWORD_FAILED: 'Verified forgot password failed'
 } as const
 
 export default USERS_MESSAGES

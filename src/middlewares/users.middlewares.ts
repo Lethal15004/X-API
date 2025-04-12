@@ -16,7 +16,7 @@ import { IAuthService } from '~/interfaces/IAuthService'
 import { IPrismaService } from '~/interfaces/IPrismaService'
 
 // Schemas
-import { UserLogoutSchema, UserVerifyEmailSchema } from '~/models/schemas/users.schemas'
+import { UserLogoutSchema, UserVerifyEmailSchema, UserVerifyForgotPasswordSchema } from '~/models/schemas/users.schemas'
 import { ErrorWithStatus } from '~/models/Errors'
 
 /**
@@ -48,17 +48,13 @@ export class UserMiddleware {
           status: HTTP_STATUS.UNAUTHORIZED
         }) // Quăng lỗi đầu tiên
       }
-      const [decoded_authorization, decoded_refreshToken, isExist] = await this.decodeAccessRefreshToken(
+      const [decoded_authorization, decoded_refreshToken] = await this.decodeAccessRefreshToken(
         rs.data.authorization,
         rs.data.refreshToken
       )
-      if (isExist) {
-        req.decoded_refresh_token = decoded_refreshToken
-        req.decoded_authorization = decoded_authorization
-        next()
-      } else {
-        throwErrors('USED_REFRESH_TOKEN_OR_NOT_EXISTS')
-      }
+      req.decoded_refresh_token = decoded_refreshToken
+      req.decoded_authorization = decoded_authorization
+      next()
     }
   }
 
@@ -74,6 +70,24 @@ export class UserMiddleware {
       }
       const decoded_email_verify_token = await this.decodeEmailVerifyToken(rs.data.emailVerifyToken)
       req.decoded_email_verify_token = decoded_email_verify_token
+      next()
+    }
+  }
+
+  public verifyForgotPasswordValidator = (source: 'body' | 'query' | 'params' | 'headers' = 'body') => {
+    return async (req: Request, res: Response, next: NextFunction) => {
+      const { forgotPasswordToken } = req[source]
+      const rs = await UserVerifyForgotPasswordSchema.safeParseAsync({ forgotPasswordToken })
+      if (!rs.success) {
+        throw new ErrorWithStatus({
+          message: rs.error.errors[0].message as string,
+          status: HTTP_STATUS.UNAUTHORIZED
+        }) // Quăng lỗi đầu tiên
+      }
+      const decoded_forgot_password_verify_token = await this.decodeForgotPasswordVerifyToken(
+        rs.data.forgotPasswordToken
+      )
+      req.decoded_forgot_password_verify_token = decoded_forgot_password_verify_token
       next()
     }
   }
@@ -94,11 +108,10 @@ export class UserMiddleware {
   private async decodeAccessRefreshToken(
     authorization: string,
     refreshToken: string
-  ): Promise<[TokenPayload, TokenPayload, RefreshTokenModel | null]> {
+  ): Promise<[TokenPayload, TokenPayload]> {
     return await Promise.all([
       this.AuthService.verifyToken(authorization as string, TokenType.AccessToken),
-      this.AuthService.verifyToken(refreshToken, TokenType.RefreshToken),
-      this.PrismaService.findFirst<RefreshTokenModel>('refresh_Tokens', { token: refreshToken })
+      this.AuthService.verifyToken(refreshToken, TokenType.RefreshToken)
     ])
   }
 
@@ -112,5 +125,9 @@ export class UserMiddleware {
 
   private async decodeEmailVerifyToken(emailVerifyToken: string): Promise<TokenPayload> {
     return await this.AuthService.verifyToken(emailVerifyToken as string, TokenType.EmailVerifyToken)
+  }
+
+  private async decodeForgotPasswordVerifyToken(forgotPasswordToken: string): Promise<TokenPayload> {
+    return await this.AuthService.verifyToken(forgotPasswordToken as string, TokenType.ForgotPasswordToken)
   }
 }
