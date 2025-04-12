@@ -12,6 +12,7 @@ export class AuthService implements IAuthService {
   private readonly JWT_SECRET_ACCESS_TOKEN: string = process.env.JWT_SECRET_ACCESS_TOKEN as string
   private readonly JWT_SECRET_REFRESH_TOKEN: string = process.env.JWT_SECRET_REFRESH_TOKEN as string
   private readonly JWT_SECRET_VERIFY_EMAIL: string = process.env.JWT_SECRET_VERIFY_EMAIL as string
+  private readonly JWT_SECRET_FORGOT_PASSWORD: string = process.env.JWT_SECRET_FORGOT_PASSWORD as string
 
   public signAccessToken(payload: string | object | Buffer): Promise<string> {
     return this.signToken(payload, this.JWT_SECRET_ACCESS_TOKEN, {
@@ -33,6 +34,13 @@ export class AuthService implements IAuthService {
     })
   }
 
+  public signForgotPasswordToken(payload: string | object | Buffer): Promise<string> {
+    return this.signToken(payload, this.JWT_SECRET_FORGOT_PASSWORD, {
+      algorithm: 'HS256',
+      expiresIn: '7d'
+    })
+  }
+
   public async verifyToken(token: string, type: TokenType): Promise<TokenPayload> {
     let privateKey: string
     switch (type) {
@@ -44,6 +52,9 @@ export class AuthService implements IAuthService {
         break
       case TokenType.EmailVerifyToken:
         privateKey = this.JWT_SECRET_VERIFY_EMAIL
+        break
+      case TokenType.ForgotPasswordToken:
+        privateKey = this.JWT_SECRET_FORGOT_PASSWORD
         break
       default:
         throw new Error('Invalid token type')

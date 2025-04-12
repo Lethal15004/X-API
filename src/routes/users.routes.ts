@@ -9,12 +9,7 @@ import { UserController } from '~/controllers/users.controllers'
 import { UserMiddleware } from '~/middlewares/users.middlewares'
 
 // Schemas
-import {
-  UserRegisterSchema,
-  UserLoginSchema,
-  UserLogoutSchema,
-  UserVerifyEmailSchema
-} from '~/models/schemas/users.schemas'
+import { UserRegisterSchema, UserLoginSchema, UserForgotPasswordSchema } from '~/models/schemas/users.schemas'
 
 // Utils
 import wrapHandler from '~/utils/handlers'
@@ -25,22 +20,33 @@ const userMiddleware = container.get<UserMiddleware>(UserMiddleware)
 
 router.post(
   '/register',
-  wrapHandler(userMiddleware.Validator(UserRegisterSchema, 'body')),
+  wrapHandler(userMiddleware.defaultValidator(UserRegisterSchema, 'body')),
   wrapHandler(userController.register)
 )
 
-router.post('/login', wrapHandler(userMiddleware.Validator(UserLoginSchema, 'body')), wrapHandler(userController.login))
-
 router.post(
-  '/logout',
-  wrapHandler(userMiddleware.Validator(UserLogoutSchema, 'body')),
-  wrapHandler(userController.logout)
+  '/login',
+  wrapHandler(userMiddleware.defaultValidator(UserLoginSchema, 'body')),
+  wrapHandler(userController.login)
 )
+
+router.post('/logout', wrapHandler(userMiddleware.logOutValidator()), wrapHandler(userController.logout))
 
 router.post(
   '/verify-email',
-  wrapHandler(userMiddleware.Validator(UserVerifyEmailSchema, 'body')),
+  wrapHandler(userMiddleware.verifyEmailValidator()),
   wrapHandler(userController.emailVerify)
 )
 
+router.post(
+  '/resend-verify-email',
+  wrapHandler(userMiddleware.accessTokenValidator()),
+  wrapHandler(userController.resendEmailVerify)
+)
+
+router.post(
+  '/forgot-password',
+  wrapHandler(userMiddleware.defaultValidator(UserForgotPasswordSchema)),
+  wrapHandler(userController.forgotPassword)
+)
 export default router

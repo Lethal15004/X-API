@@ -132,6 +132,44 @@ export class UserService implements IUserService {
     }
   }
 
+  public async resendEmailVerify(decoded_authorization: TokenPayload): Promise<boolean> {
+    const { userId } = decoded_authorization
+    const user = await this.PrismaService.findUnique<UserModel>('users', { id: userId })
+    // Check user is exist
+    if (!user) {
+      throwErrors('USER_NOT_FOUND')
+    }
+    // If email verified
+    if (user?.verifyStatus === UserVerifyStatus.Verified) {
+      throwErrors('EMAIL_ALREADY_VERIFIED_BEFORE')
+    }
+    const emailVerifiedToken = await this.createVerifyEmailToken(userId as string)
+
+    // Fake send email
+    console.log('Resend verify email: ', emailVerifiedToken)
+
+    // Update
+    await this.PrismaService.update<UserModel>('users', { id: userId }, { emailVerifiedToken: emailVerifiedToken })
+    return true
+  }
+
+  public async forgotPassword(email: string): Promise<boolean> {
+    const userExist = await this.checkEmailExist(email)
+    // Throw error if email already exists
+    if (!userExist) {
+      throwErrors('USER_NOT_FOUND')
+    }
+    const forgotPasswordToken = await this.createForgotPasswordToken(userExist?.id as string)
+    await this.PrismaService.update<UserModel>(
+      'users',
+      { id: userExist?.id },
+      { forgotPasswordToken: forgotPasswordToken }
+    )
+    // Send Email with email User: https://twitter.com/forgot-password?token=token
+    console.log('forgot password token: ', forgotPasswordToken)
+    return true
+  }
+
   // Functions help for service
   private async checkEmailExist(email: string): Promise<UserModel | null> {
     const isExist = await this.PrismaService.findUnique<UserModel>('users', { email })
@@ -157,6 +195,22 @@ export class UserService implements IUserService {
       })
     ])
     return { accessToken, refreshToken }
+  }
+
+  private async createVerifyEmailToken(userId: string): Promise<string> {
+    const emailVerifiedToken = await this.AuthService.signEmailVerifyToken({
+      userId: userId.toString(),
+      tokenType: TokenType.EmailVerifyToken
+    })
+    return emailVerifiedToken
+  }
+
+  private async createForgotPasswordToken(userId: string): Promise<string> {
+    const forgotPasswordToken = await this.AuthService.signForgotPasswordToken({
+      userId: userId.toString(),
+      tokenType: TokenType.ForgotPasswordToken
+    })
+    return forgotPasswordToken
   }
 
   private async saveRefreshToken(refreshToken: string, userId: string): Promise<void> {

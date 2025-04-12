@@ -89,3 +89,13 @@ export const UserVerifyEmailSchema = z.object({
     .nonempty(USERS_MESSAGES.VERIFY_EMAIL_TOKEN_REQUIRED)
     .trim()
 })
+
+export const UserForgotPasswordSchema = z.object({
+  email: z
+    .string({
+      required_error: USERS_MESSAGES.EMAIL_REQUIRED
+    })
+    .email(USERS_MESSAGES.INVALID_EMAIL_FORMAT)
+    .nonempty(USERS_MESSAGES.EMAIL_CANNOT_BE_EMPTY)
+    .trim() // Xóa khoảng trắng ở đầu và cuối
+})

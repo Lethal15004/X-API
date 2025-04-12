@@ -9,6 +9,7 @@ import HTTP_STATUS from '~/constants/httpStatus'
 
 // Utils
 import throwErrors from '~/utils/throwErrors.utils'
+import { splitAccessToken } from '~/utils/splitToken.utils'
 
 // Interfaces
 import { IAuthService } from '~/interfaces/IAuthService'
@@ -29,52 +30,64 @@ export class UserMiddleware {
     @inject(TYPES_SERVICE.PrismaService) private readonly PrismaService: IPrismaService
   ) {}
 
-  public Validator = (schema: ZodSchema, source: 'body' | 'query' | 'params' | 'headers' = 'body') => {
+  public defaultValidator = (schema: ZodSchema, source: 'body' | 'query' | 'params' | 'headers' = 'body') => {
     return async (req: Request, res: Response, next: NextFunction) => {
-      switch (schema) {
-        case UserLogoutSchema: {
-          const { authorization } = req.headers
-          const { refreshToken } = req[source]
-          const rs = await schema.safeParseAsync({ authorization, refreshToken })
-          if (!rs.success) {
-            throw new ErrorWithStatus({
-              message: rs.error.errors[0].message as string,
-              status: HTTP_STATUS.UNAUTHORIZED
-            }) // Quăng lỗi đầu tiên
-          }
-          const [decoded_authorization, decoded_refreshToken, isExist] = await this.decodeAccessRefreshToken(
-            rs.data.authorization,
-            rs.data.refreshToken
-          )
-          if (isExist) {
-            req.decoded_refresh_token = decoded_refreshToken
-            req.decoded_authorization = decoded_authorization
-            next()
-          } else {
-            throwErrors('USED_REFRESH_TOKEN_OR_NOT_EXISTS')
-          }
-          break
-        }
-        case UserVerifyEmailSchema: {
-          const { emailVerifyToken } = req[source]
-          const rs = await schema.safeParseAsync({ emailVerifyToken })
-          if (!rs.success) {
-            throw new ErrorWithStatus({
-              message: rs.error.errors[0].message as string,
-              status: HTTP_STATUS.UNAUTHORIZED
-            }) // Quăng lỗi đầu tiên
-          }
-          const decoded_email_verify_token = await this.decodeEmailVerifyToken(rs.data.emailVerifyToken)
-          req.decoded_email_verify_token = decoded_email_verify_token
-          next()
-          break
-        }
-        default: {
-          req.body = await schema.parseAsync(req[source])
-          next()
-          break
-        }
+      req.body = await schema.parseAsync(req[source])
+      next()
+    }
+  }
+
+  public logOutValidator = (source: 'body' | 'query' | 'params' | 'headers' = 'body') => {
+    return async (req: Request, res: Response, next: NextFunction) => {
+      const { authorization } = req.headers
+      const { refreshToken } = req[source]
+      const rs = await UserLogoutSchema.safeParseAsync({ authorization, refreshToken })
+      if (!rs.success) {
+        throw new ErrorWithStatus({
+          message: rs.error.errors[0].message as string,
+          status: HTTP_STATUS.UNAUTHORIZED
+        }) // Quăng lỗi đầu tiên
       }
+      const [decoded_authorization, decoded_refreshToken, isExist] = await this.decodeAccessRefreshToken(
+        rs.data.authorization,
+        rs.data.refreshToken
+      )
+      if (isExist) {
+        req.decoded_refresh_token = decoded_refreshToken
+        req.decoded_authorization = decoded_authorization
+        next()
+      } else {
+        throwErrors('USED_REFRESH_TOKEN_OR_NOT_EXISTS')
+      }
+    }
+  }
+
+  public verifyEmailValidator = (source: 'body' | 'query' | 'params' | 'headers' = 'body') => {
+    return async (req: Request, res: Response, next: NextFunction) => {
+      const { emailVerifyToken } = req[source]
+      const rs = await UserVerifyEmailSchema.safeParseAsync({ emailVerifyToken })
+      if (!rs.success) {
+        throw new ErrorWithStatus({
+          message: rs.error.errors[0].message as string,
+          status: HTTP_STATUS.UNAUTHORIZED
+        }) // Quăng lỗi đầu tiên
+      }
+      const decoded_email_verify_token = await this.decodeEmailVerifyToken(rs.data.emailVerifyToken)
+      req.decoded_email_verify_token = decoded_email_verify_token
+      next()
+    }
+  }
+
+  public accessTokenValidator = (source: 'body' | 'query' | 'params' | 'headers' = 'headers') => {
+    return async (req: Request, res: Response, next: NextFunction) => {
+      const { authorization } = req.headers
+      if (!authorization) {
+        throwErrors('ACCESS_TOKEN_REQUIRED')
+      }
+      const splitAuthorization = splitAccessToken(authorization as string)
+      const decoded_authorization = await this.decodeAccessToken(splitAuthorization as string)
+      req.decoded_authorization = decoded_authorization
+      next()
     }
   }
 
@@ -87,6 +100,14 @@ export class UserMiddleware {
       this.AuthService.verifyToken(refreshToken, TokenType.RefreshToken),
       this.PrismaService.findFirst<RefreshTokenModel>('refresh_Tokens', { token: refreshToken })
     ])
+  }
+
+  private async decodeAccessToken(authorization: string): Promise<TokenPayload> {
+    return await this.AuthService.verifyToken(authorization as string, TokenType.AccessToken)
+  }
+
+  private async decodeRefreshToken(refreshToken: string): Promise<TokenPayload> {
+    return await this.AuthService.verifyToken(refreshToken as string, TokenType.RefreshToken)
   }
 
   private async decodeEmailVerifyToken(emailVerifyToken: string): Promise<TokenPayload> {

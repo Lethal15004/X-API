@@ -60,7 +60,13 @@ const USERS_MESSAGES = {
   INVALID_VERIFY_EMAIL_TOKEN: 'Invalid verify email token',
   EMAIL_ALREADY_VERIFIED_BEFORE: 'Email already verified before',
   VERIFIED_EMAIL_SUCCESS: 'Verified email success',
-  VERIFIED_EMAIL_FAILED: 'Verified email failed'
+  VERIFIED_EMAIL_FAILED: 'Verified email failed',
+  RESEND_VERIFY_EMAIL_SUCCESS: 'Resend verify email success',
+  RESEND_VERIFY_EMAIL_FAILED: 'Resend verify email failed',
+
+  // Forgot password token
+  CHECK_EMAIL_TO_RESET_PASSWORD: 'Check email to reset password',
+  EMAIL_TO_RESET_PASSWORD_FAILED: 'Send email to reset password failed'
 } as const
 
 export default USERS_MESSAGES
