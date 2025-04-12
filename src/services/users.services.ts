@@ -109,7 +109,7 @@ export class UserService implements IUserService {
   }> {
     const { userId } = decoded_email_verify_token
 
-    const user = await this.PrismaService.findUnique<UserModel>('users', { id: userId })
+    const user = await this.checkUserExist(userId)
     // Check user is exist
     if (!user) {
       throwErrors('USER_NOT_FOUND')
@@ -136,7 +136,7 @@ export class UserService implements IUserService {
 
   public async resendEmailVerify(decoded_authorization: TokenPayload): Promise<boolean> {
     const { userId } = decoded_authorization
-    const user = await this.PrismaService.findUnique<UserModel>('users', { id: userId })
+    const user = await this.checkUserExist(userId)
     // Check user is exist
     if (!user) {
       throwErrors('USER_NOT_FOUND')
@@ -177,7 +177,7 @@ export class UserService implements IUserService {
     forgotPasswordToken: string
   ): Promise<boolean> {
     const { userId } = decoded_forgot_password_verify_token
-    const user = await this.PrismaService.findUnique<UserModel>('users', { id: userId })
+    const user = await this.checkUserExist(userId)
     // Check user is exist
     if (!user) {
       throwErrors('USER_NOT_FOUND')
@@ -185,6 +185,28 @@ export class UserService implements IUserService {
     if (user?.forgotPasswordToken !== forgotPasswordToken) {
       throwErrors('INVALID_FORGOT_PASSWORD_TOKEN')
     }
+    return true
+  }
+
+  public async resetPassword(
+    decoded_forgot_password_verify_token: TokenPayload,
+    forgotPasswordToken: string,
+    password: string
+  ): Promise<boolean> {
+    const { userId } = decoded_forgot_password_verify_token
+    const user = await this.checkUserExist(userId)
+    // Check user is exist
+    if (!user) {
+      throwErrors('USER_NOT_FOUND')
+    }
+    if (user?.forgotPasswordToken !== forgotPasswordToken) {
+      throwErrors('INVALID_FORGOT_PASSWORD_TOKEN')
+    }
+    await this.PrismaService.update<UserModel>(
+      'users',
+      { id: user?.id },
+      { forgotPasswordToken: '', password: bcryptPassword.hashPassword(password) }
+    )
     return true
   }
 
@@ -199,6 +221,11 @@ export class UserService implements IUserService {
     if (!isMatch) {
       throwErrors('PASSWORD_INCORRECT')
     }
+  }
+
+  private async checkUserExist(userId: string): Promise<UserModel | null> {
+    const user = await this.PrismaService.findUnique<UserModel>('users', { id: userId })
+    return user
   }
 
   private async createTokens(userId: string): Promise<{ accessToken: string; refreshToken: string }> {

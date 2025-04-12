@@ -70,7 +70,11 @@ const USERS_MESSAGES = {
   VERIFY_PASSWORD_TOKEN_REQUIRED: 'Verify password token is required',
   INVALID_FORGOT_PASSWORD_TOKEN: 'Invalid forgot password token',
   VERIFIED_FORGOT_PASSWORD_SUCCESS: 'Verified forgot password success',
-  VERIFIED_FORGOT_PASSWORD_FAILED: 'Verified forgot password failed'
+  VERIFIED_FORGOT_PASSWORD_FAILED: 'Verified forgot password failed',
+
+  // Reset password
+  RESET_PASSWORD_SUCCESS: 'Reset password success',
+  RESET_PASSWORD_FAILED: 'Reset password failed'
 } as const
 
 export default USERS_MESSAGES

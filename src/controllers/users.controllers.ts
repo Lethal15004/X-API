@@ -110,4 +110,21 @@ export class UserController {
       })
     }
   }
+
+  public resetPassword = async (req: Request<ParamsDictionary, any, UserResetPasswordBody>, res: Response) => {
+    const result = await this.UserService.resetPassword(
+      req.decoded_forgot_password_verify_token as TokenPayload,
+      req.body.forgotPasswordToken as string,
+      req.body.password as string
+    )
+    if (result) {
+      res.status(HTTP_STATUS.OK).json({
+        message: USERS_MESSAGES.RESET_PASSWORD_SUCCESS
+      })
+    } else {
+      res.status(HTTP_STATUS.UNAUTHORIZED).json({
+        message: USERS_MESSAGES.RESET_PASSWORD_FAILED
+      })
+    }
+  }
 }

@@ -13,10 +13,14 @@ import { splitAccessToken } from '~/utils/splitToken.utils'
 
 // Interfaces
 import { IAuthService } from '~/interfaces/IAuthService'
-import { IPrismaService } from '~/interfaces/IPrismaService'
 
 // Schemas
-import { UserLogoutSchema, UserVerifyEmailSchema, UserVerifyForgotPasswordSchema } from '~/models/schemas/users.schemas'
+import {
+  UserLogoutSchema,
+  UserResetPasswordSchema,
+  UserVerifyEmailSchema,
+  UserVerifyForgotPasswordSchema
+} from '~/models/schemas/users.schemas'
 import { ErrorWithStatus } from '~/models/Errors'
 
 /**
@@ -25,10 +29,7 @@ import { ErrorWithStatus } from '~/models/Errors'
  */
 @injectable()
 export class UserMiddleware {
-  constructor(
-    @inject(TYPES_SERVICE.AuthService) private readonly AuthService: IAuthService,
-    @inject(TYPES_SERVICE.PrismaService) private readonly PrismaService: IPrismaService
-  ) {}
+  constructor(@inject(TYPES_SERVICE.AuthService) private readonly AuthService: IAuthService) {}
 
   public defaultValidator = (schema: ZodSchema, source: 'body' | 'query' | 'params' | 'headers' = 'body') => {
     return async (req: Request, res: Response, next: NextFunction) => {
@@ -78,6 +79,23 @@ export class UserMiddleware {
     return async (req: Request, res: Response, next: NextFunction) => {
       const { forgotPasswordToken } = req[source]
       const rs = await UserVerifyForgotPasswordSchema.safeParseAsync({ forgotPasswordToken })
+      if (!rs.success) {
+        throw new ErrorWithStatus({
+          message: rs.error.errors[0].message as string,
+          status: HTTP_STATUS.UNAUTHORIZED
+        }) // Quăng lỗi đầu tiên
+      }
+      const decoded_forgot_password_verify_token = await this.decodeForgotPasswordVerifyToken(
+        rs.data.forgotPasswordToken
+      )
+      req.decoded_forgot_password_verify_token = decoded_forgot_password_verify_token
+      next()
+    }
+  }
+
+  public resetPasswordValidator = (source: 'body' | 'query' | 'params' | 'headers' = 'body') => {
+    return async (req: Request, res: Response, next: NextFunction) => {
+      const rs = await UserResetPasswordSchema.safeParseAsync(req[source])
       if (!rs.success) {
         throw new ErrorWithStatus({
           message: rs.error.errors[0].message as string,

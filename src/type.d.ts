@@ -11,7 +11,8 @@ import {
   UserLogoutSchema,
   UserVerifyEmailSchema,
   UserForgotPasswordSchema,
-  UserVerifyForgotPasswordSchema
+  UserVerifyForgotPasswordSchema,
+  UserResetPasswordSchema
 } from './models/schemas/users.schemas'
 
 // Models prisma
@@ -42,6 +43,7 @@ declare global {
   type UserVerifyEmailBody = z.infer<typeof UserVerifyEmailSchema>
   type UserForgotPasswordBody = z.infer<typeof UserForgotPasswordSchema>
   type UserVerifyForgotPasswordBody = z.infer<typeof UserVerifyForgotPasswordSchema>
+  type UserResetPasswordBody = z.infer<typeof UserResetPasswordSchema>
 
   type TokenPayload = jwt.JwtPayload & {
     userId: string

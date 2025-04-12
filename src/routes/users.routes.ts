@@ -60,4 +60,10 @@ router.post(
   wrapHandler(userMiddleware.verifyForgotPasswordValidator()),
   wrapHandler(userController.verifyForgotPassword)
 )
+
+router.post(
+  '/reset-password',
+  wrapHandler(userMiddleware.resetPasswordValidator()),
+  wrapHandler(userController.resetPassword)
+)
 export default router

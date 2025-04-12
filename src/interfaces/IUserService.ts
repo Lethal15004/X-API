@@ -9,4 +9,9 @@ export interface IUserService {
     decoded_forgot_password_verify_token: TokenPayload,
     forgotPasswordToken: string
   ): Promise<boolean>
+  resetPassword(
+    decoded_forgot_password_verify_token: TokenPayload,
+    forgotPasswordToken: string,
+    password: string
+  ): Promise<boolean>
 }
