@@ -5,6 +5,8 @@ const USERS_MESSAGES = {
 
   // Users
   USER_NOT_FOUND: 'User not found',
+  GET_ME_SUCCESS: 'Get my profile success',
+  GET_ME_FAILED: 'Get my profile failed',
 
   // Date
   DATE_REQUIRED: 'Date is required',

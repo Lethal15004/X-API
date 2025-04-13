@@ -14,6 +14,20 @@ import { IUserService } from '~/interfaces/IUserService'
 export class UserController {
   constructor(@inject(TYPES_SERVICE.UserService) private readonly UserService: IUserService) {}
 
+  public getMe = async (req: Request, res: Response) => {
+    const user = await this.UserService.getMe(req.decoded_authorization?.userId as string)
+    if (user) {
+      res.status(HTTP_STATUS.OK).json({
+        message: USERS_MESSAGES.GET_ME_SUCCESS,
+        user: user
+      })
+    } else {
+      res.status(HTTP_STATUS.UNAUTHORIZED).json({
+        message: USERS_MESSAGES.GET_ME_FAILED
+      })
+    }
+  }
+
   public register = async (req: Request<ParamsDictionary, any, UserRegisterBody>, res: Response) => {
     const userExist = await this.UserService.register(req.body)
     if (userExist) {

@@ -17,11 +17,13 @@ import {
 } from '~/models/schemas/users.schemas'
 
 // Utils
-import wrapHandler from '~/utils/handlers'
+import wrapHandler from '~/utils/handlers.utils'
 
 // Get controllers and middlewares
 const userController = container.get<UserController>(UserController)
 const userMiddleware = container.get<UserMiddleware>(UserMiddleware)
+
+router.get('/me', wrapHandler(userMiddleware.accessTokenValidator()), wrapHandler(userController.getMe))
 
 router.post(
   '/register',

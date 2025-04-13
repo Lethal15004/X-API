@@ -8,10 +8,11 @@ export class PrismaService implements IPrismaService {
   constructor() {
     this.prisma = new PrismaClient()
   }
-  public async findUnique<T>(model: string, where: any): Promise<T | null> {
+  public async findUnique<T>(model: string, where: any, select?: any): Promise<T | null> {
     this.checkModelExist(model)
     return (this.prisma as any)[model].findUnique({
-      where
+      where,
+      select
     }) as Promise<T | null>
   }
   public async findFirst<T>(model: string, where: any): Promise<T | null> {

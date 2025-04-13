@@ -4,6 +4,7 @@ import { omit } from 'lodash'
 // Utils
 import * as bcryptPassword from '~/utils/bcrypt.utils'
 import throwErrors from '~/utils/throwErrors.utils'
+import excludeFields from '~/utils/sanitize.utils'
 
 // Constants
 import { TYPES_SERVICE } from '~/constants/types'
@@ -34,6 +35,15 @@ export class UserService implements IUserService {
     @inject(TYPES_SERVICE.PrismaService) private readonly PrismaService: IPrismaService,
     @inject(TYPES_SERVICE.AuthService) private readonly AuthService: IAuthService
   ) {}
+
+  public async getMe(userId: string): Promise<UserModel> {
+    const user = await this.checkUserExist(userId as string)
+    if (!user) {
+      throwErrors('USER_NOT_FOUND')
+    }
+    const newUser = excludeFields(user as UserModel, ['password', 'emailVerifiedToken', 'forgotPasswordToken'])
+    return newUser as UserModel
+  }
 
   public async register(user: UserRegisterBody): Promise<{
     user: UserModel
