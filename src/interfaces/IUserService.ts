@@ -1,5 +1,6 @@
 export interface IUserService {
   getMe(userId: string): Promise<UserModel>
+  updateMe(userId: string, payload: UserUpdateBody): Promise<UserModel>
   register(userData: UserRegisterBody): Promise<{ user: UserModel; accessToken: string; refreshToken: string }>
   login(credentials: UserLoginBody): Promise<{ user: UserModel; accessToken: string; refreshToken: string }>
   logout(refreshToken: string): Promise<boolean>

@@ -4,7 +4,7 @@ import { inject, injectable } from 'inversify'
 
 // Constants
 import { TYPES_SERVICE } from '~/constants/types'
-import { TokenType } from '~/constants/enums'
+import { TokenType, UserVerifyStatus } from '~/constants/enums'
 import HTTP_STATUS from '~/constants/httpStatus'
 
 // Utils
@@ -121,6 +121,14 @@ export class UserMiddleware {
       req.decoded_authorization = decoded_authorization
       next()
     }
+  }
+
+  public verifiedUserValidator = async (req: Request, res: Response, next: NextFunction) => {
+    const { verifyStatus } = req.decoded_authorization as TokenPayload
+    if (verifyStatus !== UserVerifyStatus.Verified) {
+      throwErrors('USER_NOT_VERIFIED')
+    }
+    next()
   }
 
   private async decodeAccessRefreshToken(

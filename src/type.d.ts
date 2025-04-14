@@ -2,7 +2,7 @@ import { z } from 'zod'
 import jwt, { decode, SignOptions } from 'jsonwebtoken'
 
 // Constants
-import { TokenType } from './constants/enums'
+import { TokenType, UserVerifyStatus } from './constants/enums'
 
 // Models
 import {
@@ -12,7 +12,8 @@ import {
   UserVerifyEmailSchema,
   UserForgotPasswordSchema,
   UserVerifyForgotPasswordSchema,
-  UserResetPasswordSchema
+  UserResetPasswordSchema,
+  UserUpdateSchema
 } from './models/schemas/users.schemas'
 
 // Models prisma
@@ -33,6 +34,7 @@ declare global {
     | 'USED_REFRESH_TOKEN_OR_NOT_EXISTS'
     | 'EMAIL_ALREADY_VERIFIED_BEFORE'
     | 'INVALID_FORGOT_PASSWORD_TOKEN'
+    | 'USER_NOT_VERIFIED'
 
   // Type Request
   type UserRegisterBody = z.infer<typeof UserRegisterSchema>
@@ -44,10 +46,12 @@ declare global {
   type UserForgotPasswordBody = z.infer<typeof UserForgotPasswordSchema>
   type UserVerifyForgotPasswordBody = z.infer<typeof UserVerifyForgotPasswordSchema>
   type UserResetPasswordBody = z.infer<typeof UserResetPasswordSchema>
+  type UserUpdateBody = z.infer<typeof UserUpdateSchema>
 
   type TokenPayload = jwt.JwtPayload & {
     userId: string
     tokenType: TokenType
+    verifyStatus: UserVerifyStatus
   }
 
   // Type Model

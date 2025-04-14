@@ -38,10 +38,16 @@ export class UserService implements IUserService {
 
   public async getMe(userId: string): Promise<UserModel> {
     const user = await this.checkUserExist(userId as string)
-    if (!user) {
-      throwErrors('USER_NOT_FOUND')
-    }
     const newUser = excludeFields(user as UserModel, ['password', 'emailVerifiedToken', 'forgotPasswordToken'])
+    return newUser as UserModel
+  }
+
+  public async updateMe(userId: string, payload: UserUpdateBody): Promise<UserModel> {
+    const [user, userUpdated] = await Promise.all([
+      this.checkUserExist(userId as string),
+      this.PrismaService.update<UserModel>('users', { id: userId }, payload)
+    ])
+    const newUser = excludeFields(userUpdated as UserModel, ['password', 'emailVerifiedToken', 'forgotPasswordToken'])
     return newUser as UserModel
   }
 
@@ -57,7 +63,7 @@ export class UserService implements IUserService {
       throwErrors('EMAIL_EXISTS')
     }
     const userId = new ObjectId()
-    const emailVerifiedToken = await this.createVerifyEmailToken(userId.toString())
+    const emailVerifiedToken = await this.createVerifyEmailToken(userId.toString(), UserVerifyStatus.Unverified)
 
     const userData = {
       ...omit(user, ['confirm_password']),
@@ -68,7 +74,7 @@ export class UserService implements IUserService {
     }
     const newUser = await this.PrismaService.create<UserModel>('users', userData)
 
-    const { accessToken, refreshToken } = await this.createTokens(newUser.id)
+    const { accessToken, refreshToken } = await this.createTokens(newUser.id, UserVerifyStatus.Unverified)
 
     // Insert refresh token
     await this.saveRefreshToken(refreshToken, newUser.id)
@@ -93,7 +99,10 @@ export class UserService implements IUserService {
     // Check password
     this.checkPassword(user.password, userExist!)
 
-    const { accessToken, refreshToken } = await this.createTokens(userExist!.id)
+    const { accessToken, refreshToken } = await this.createTokens(
+      userExist!.id,
+      userExist?.verifyStatus as UserVerifyStatus
+    )
     // Insert refresh token
     await this.saveRefreshToken(refreshToken, userExist!.id)
 
@@ -120,17 +129,13 @@ export class UserService implements IUserService {
     const { userId } = decoded_email_verify_token
 
     const user = await this.checkUserExist(userId)
-    // Check user is exist
-    if (!user) {
-      throwErrors('USER_NOT_FOUND')
-    }
     // If email verified
     if (user?.emailVerifiedToken === '') {
       throwErrors('EMAIL_ALREADY_VERIFIED_BEFORE')
     }
 
     const [token] = await Promise.all([
-      this.createTokens(userId),
+      this.createTokens(userId, UserVerifyStatus.Verified),
       await this.PrismaService.update<UserModel>(
         'users',
         { id: userId },
@@ -147,15 +152,12 @@ export class UserService implements IUserService {
   public async resendEmailVerify(decoded_authorization: TokenPayload): Promise<boolean> {
     const { userId } = decoded_authorization
     const user = await this.checkUserExist(userId)
-    // Check user is exist
-    if (!user) {
-      throwErrors('USER_NOT_FOUND')
-    }
+
     // If email verified
     if (user?.verifyStatus === UserVerifyStatus.Verified) {
       throwErrors('EMAIL_ALREADY_VERIFIED_BEFORE')
     }
-    const emailVerifiedToken = await this.createVerifyEmailToken(userId as string)
+    const emailVerifiedToken = await this.createVerifyEmailToken(userId as string, UserVerifyStatus.Unverified)
 
     // Fake send email
     console.log('Resend verify email: ', emailVerifiedToken)
@@ -167,11 +169,11 @@ export class UserService implements IUserService {
 
   public async forgotPassword(email: string): Promise<boolean> {
     const userExist = await this.checkEmailExist(email)
-    // Throw error if email already exists
-    if (!userExist) {
-      throwErrors('USER_NOT_FOUND')
-    }
-    const forgotPasswordToken = await this.createForgotPasswordToken(userExist?.id as string)
+
+    const forgotPasswordToken = await this.createForgotPasswordToken(
+      userExist?.id as string,
+      userExist?.verifyStatus as UserVerifyStatus
+    )
     await this.PrismaService.update<UserModel>(
       'users',
       { id: userExist?.id },
@@ -188,10 +190,7 @@ export class UserService implements IUserService {
   ): Promise<boolean> {
     const { userId } = decoded_forgot_password_verify_token
     const user = await this.checkUserExist(userId)
-    // Check user is exist
-    if (!user) {
-      throwErrors('USER_NOT_FOUND')
-    }
+
     if (user?.forgotPasswordToken !== forgotPasswordToken) {
       throwErrors('INVALID_FORGOT_PASSWORD_TOKEN')
     }
@@ -205,10 +204,7 @@ export class UserService implements IUserService {
   ): Promise<boolean> {
     const { userId } = decoded_forgot_password_verify_token
     const user = await this.checkUserExist(userId)
-    // Check user is exist
-    if (!user) {
-      throwErrors('USER_NOT_FOUND')
-    }
+
     if (user?.forgotPasswordToken !== forgotPasswordToken) {
       throwErrors('INVALID_FORGOT_PASSWORD_TOKEN')
     }
@@ -235,35 +231,45 @@ export class UserService implements IUserService {
 
   private async checkUserExist(userId: string): Promise<UserModel | null> {
     const user = await this.PrismaService.findUnique<UserModel>('users', { id: userId })
+    if (!user) {
+      throwErrors('USER_NOT_FOUND')
+    }
     return user
   }
 
-  private async createTokens(userId: string): Promise<{ accessToken: string; refreshToken: string }> {
+  private async createTokens(
+    userId: string,
+    verifyStatus: UserVerifyStatus
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     const [accessToken, refreshToken] = await Promise.all([
       this.AuthService.signAccessToken({
         userId,
-        tokenType: TokenType.AccessToken
+        tokenType: TokenType.AccessToken,
+        verifyStatus: verifyStatus
       }),
       this.AuthService.signRefreshToken({
         userId,
-        tokenType: TokenType.RefreshToken
+        tokenType: TokenType.RefreshToken,
+        verifyStatus: verifyStatus
       })
     ])
     return { accessToken, refreshToken }
   }
 
-  private async createVerifyEmailToken(userId: string): Promise<string> {
+  private async createVerifyEmailToken(userId: string, verifyStatus: UserVerifyStatus): Promise<string> {
     const emailVerifiedToken = await this.AuthService.signEmailVerifyToken({
       userId: userId.toString(),
-      tokenType: TokenType.EmailVerifyToken
+      tokenType: TokenType.EmailVerifyToken,
+      verifyStatus: verifyStatus
     })
     return emailVerifiedToken
   }
 
-  private async createForgotPasswordToken(userId: string): Promise<string> {
+  private async createForgotPasswordToken(userId: string, verifyStatus: UserVerifyStatus): Promise<string> {
     const forgotPasswordToken = await this.AuthService.signForgotPasswordToken({
       userId: userId.toString(),
-      tokenType: TokenType.ForgotPasswordToken
+      tokenType: TokenType.ForgotPasswordToken,
+      verifyStatus: verifyStatus
     })
     return forgotPasswordToken
   }

@@ -5,6 +5,7 @@ const USERS_MESSAGES = {
 
   // Users
   USER_NOT_FOUND: 'User not found',
+  USER_NOT_VERIFIED: 'User not verified',
   GET_ME_SUCCESS: 'Get my profile success',
   GET_ME_FAILED: 'Get my profile failed',
 
@@ -17,6 +18,11 @@ const USERS_MESSAGES = {
   NAME_TOO_LONG: 'Name is too long',
   NAME_REQUIRED: 'Name is required',
   NAME_CANNOT_BE_EMPTY: 'Name cannot be empty',
+
+  // Username
+  USER_NAME_TOO_SHORT: 'User name is too short',
+  USER_NAME_TOO_LONG: 'User name is too long',
+  USERNAME_INVALID: 'Username can only contain letters, numbers, and underscores',
 
   // Password
   PASSWORD_TOO_SHORT: 'Password is too short',
@@ -40,6 +46,26 @@ const USERS_MESSAGES = {
   INVALID_EMAIL_FORMAT: 'Invalid email format',
   EMAIL_CANNOT_BE_EMPTY: 'Email cannot be empty',
 
+  // Bio
+  BIO_TOO_SHORT: 'Bio is too short',
+  BIO_TOO_LONG: 'Bio is too long',
+
+  // Location
+  LOCATION_TOO_SHORT: 'Location is too short',
+  LOCATION_TOO_LONG: 'Location is too long',
+
+  // Website
+  WEBSITE_TOO_SHORT: 'Website is too short',
+  WEBSITE_TOO_LONG: 'Website is too long',
+
+  // Avatar
+  AVATAR_TOO_SHORT: 'Avatar is too short',
+  AVATAR_TOO_LONG: 'Avatar is too long',
+
+  // Cover photo
+  COVER_PHOTO_TOO_SHORT: 'Cover photo is too short',
+  COVER_PHOTO_TOO_LONG: 'Cover photo is too long',
+
   // JSON
   LOGIN_SUCCESS: 'User login success',
   REGISTER_SUCCESS: 'User register success',
@@ -47,6 +73,8 @@ const USERS_MESSAGES = {
   LOGIN_FAILED: 'User login failed',
   REGISTER_FAILED: 'User register failed',
   LOGOUT_FAILED: 'User logout failed',
+  UPDATE_SUCCESS: 'User update success',
+  UPDATE_FAILED: 'User update failed',
 
   // Access token
   ACCESS_TOKEN_REQUIRED: 'Access token is required',

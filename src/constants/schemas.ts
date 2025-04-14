@@ -4,6 +4,8 @@ import { z } from 'zod'
 import USERS_MESSAGES from '~/constants/messages'
 
 // Define schema for help
+
+// 1. Users
 export const passwordSchema = z
   .string({
     required_error: USERS_MESSAGES.PASSWORD_REQUIRED
@@ -28,3 +30,35 @@ export const confirmPasswordSchema = z
   .min(8, USERS_MESSAGES.CONFIRM_PASSWORD_TOO_SHORT)
   .max(255, USERS_MESSAGES.CONFIRM_PASSWORD_TOO_LONG)
   .nonempty(USERS_MESSAGES.CONFIRM_PASSWORD_CANNOT_BE_EMPTY)
+
+export const nameSchema = z
+  .string({
+    required_error: USERS_MESSAGES.NAME_REQUIRED
+  })
+  .min(3, USERS_MESSAGES.NAME_TOO_SHORT)
+  .max(50, USERS_MESSAGES.NAME_TOO_LONG)
+  .nonempty(USERS_MESSAGES.NAME_CANNOT_BE_EMPTY)
+  .trim() // Xóa khoảng trắng ở đầu và cuối
+
+export const dateOfBirthSchema = z
+  .string({ required_error: USERS_MESSAGES.DATE_REQUIRED })
+  .regex(/^\d{4}-\d{2}-\d{2}$/, {
+    message: USERS_MESSAGES.INVALID_DATE_FORMAT
+  })
+  .transform((val) => new Date(`${val}T00:00:00.000Z`))
+
+export const refreshTokenSchema = z
+  .string({
+    required_error: USERS_MESSAGES.REFRESH_TOKEN_REQUIRED
+  })
+  .nonempty(USERS_MESSAGES.REFRESH_TOKEN_REQUIRED)
+
+export const accessTokenSchema = z
+  .string({
+    required_error: USERS_MESSAGES.ACCESS_TOKEN_REQUIRED
+  })
+  .nonempty(USERS_MESSAGES.ACCESS_TOKEN_REQUIRED)
+  .regex(/^Bearer\s+/, {
+    message: USERS_MESSAGES.INVALID_ACCESS_TOKEN
+  })
+  .transform((bearer) => bearer.split(' ')[1])

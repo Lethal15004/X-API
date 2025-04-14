@@ -28,6 +28,18 @@ export class UserController {
     }
   }
 
+  public updateMe = async (req: Request<ParamsDictionary, any, UserUpdateBody>, res: Response) => {
+    const user = await this.UserService.updateMe(req.decoded_authorization?.userId as string, req.body)
+    if (user) {
+      res.status(HTTP_STATUS.OK).json({
+        message: USERS_MESSAGES.UPDATE_SUCCESS,
+        user: user
+      })
+    } else {
+      res.status(HTTP_STATUS.BAD_REQUEST).json({ message: USERS_MESSAGES.UPDATE_FAILED })
+    }
+  }
+
   public register = async (req: Request<ParamsDictionary, any, UserRegisterBody>, res: Response) => {
     const userExist = await this.UserService.register(req.body)
     if (userExist) {

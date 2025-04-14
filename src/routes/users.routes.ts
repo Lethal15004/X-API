@@ -13,7 +13,7 @@ import {
   UserRegisterSchema,
   UserLoginSchema,
   UserForgotPasswordSchema,
-  UserVerifyForgotPasswordSchema
+  UserUpdateSchema
 } from '~/models/schemas/users.schemas'
 
 // Utils
@@ -25,17 +25,21 @@ const userMiddleware = container.get<UserMiddleware>(UserMiddleware)
 
 router.get('/me', wrapHandler(userMiddleware.accessTokenValidator()), wrapHandler(userController.getMe))
 
-router.post(
-  '/register',
-  wrapHandler(userMiddleware.defaultValidator(UserRegisterSchema, 'body')),
-  wrapHandler(userController.register)
+router.patch(
+  '/me',
+  wrapHandler(userMiddleware.accessTokenValidator()),
+  wrapHandler(userMiddleware.verifiedUserValidator),
+  wrapHandler(userMiddleware.defaultValidator(UserUpdateSchema)),
+  wrapHandler(userController.updateMe)
 )
 
 router.post(
-  '/login',
-  wrapHandler(userMiddleware.defaultValidator(UserLoginSchema, 'body')),
-  wrapHandler(userController.login)
+  '/register',
+  wrapHandler(userMiddleware.defaultValidator(UserRegisterSchema)),
+  wrapHandler(userController.register)
 )
+
+router.post('/login', wrapHandler(userMiddleware.defaultValidator(UserLoginSchema)), wrapHandler(userController.login))
 
 router.post('/logout', wrapHandler(userMiddleware.logOutValidator()), wrapHandler(userController.logout))
 
