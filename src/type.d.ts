@@ -47,6 +47,9 @@ declare global {
   type UserVerifyForgotPasswordBody = z.infer<typeof UserVerifyForgotPasswordSchema>
   type UserResetPasswordBody = z.infer<typeof UserResetPasswordSchema>
   type UserUpdateBody = z.infer<typeof UserUpdateSchema>
+  type UserGetProfileParams = {
+    username: string
+  }
 
   type TokenPayload = jwt.JwtPayload & {
     userId: string

@@ -42,6 +42,22 @@ export class UserService implements IUserService {
     return newUser as UserModel
   }
 
+  public async getProfile(username: string): Promise<UserModel> {
+    const user = await this.PrismaService.findUnique<UserModel>('users', { username: username })
+    if (!user) {
+      throwErrors('USER_NOT_FOUND')
+    }
+    const newUser = excludeFields(user as UserModel, [
+      'password',
+      'emailVerifiedToken',
+      'forgotPasswordToken',
+      'verifyStatus',
+      'createdAt',
+      'updatedAt'
+    ])
+    return newUser as UserModel
+  }
+
   public async updateMe(userId: string, payload: UserUpdateBody): Promise<UserModel> {
     const [user, userUpdated] = await Promise.all([
       this.checkUserExist(userId as string),

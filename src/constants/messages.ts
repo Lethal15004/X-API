@@ -75,6 +75,8 @@ const USERS_MESSAGES = {
   LOGOUT_FAILED: 'User logout failed',
   UPDATE_SUCCESS: 'User update success',
   UPDATE_FAILED: 'User update failed',
+  GET_PROFILE_SUCCESS: 'Get profile success',
+  GET_PROFILE_FAILED: 'Get profile failed',
 
   // Access token
   ACCESS_TOKEN_REQUIRED: 'Access token is required',

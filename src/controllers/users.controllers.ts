@@ -28,6 +28,21 @@ export class UserController {
     }
   }
 
+  public getProfile = async (req: Request<UserGetProfileParams>, res: Response) => {
+    const { username } = req.params
+    const user = await this.UserService.getProfile(username)
+    if (user) {
+      res.status(HTTP_STATUS.OK).json({
+        message: USERS_MESSAGES.GET_PROFILE_SUCCESS,
+        user: user
+      })
+    } else {
+      res.status(HTTP_STATUS.BAD_REQUEST).json({
+        message: USERS_MESSAGES.GET_PROFILE_FAILED
+      })
+    }
+  }
+
   public updateMe = async (req: Request<ParamsDictionary, any, UserUpdateBody>, res: Response) => {
     const user = await this.UserService.updateMe(req.decoded_authorization?.userId as string, req.body)
     if (user) {

@@ -24,6 +24,7 @@ const userController = container.get<UserController>(UserController)
 const userMiddleware = container.get<UserMiddleware>(UserMiddleware)
 
 router.get('/me', wrapHandler(userMiddleware.accessTokenValidator()), wrapHandler(userController.getMe))
+router.get('/:username', wrapHandler(userController.getProfile))
 
 router.patch(
   '/me',

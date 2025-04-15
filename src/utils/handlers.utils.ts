@@ -4,8 +4,8 @@ import { ZodError } from 'zod'
 // Models
 import { ErrorEntity } from '~/models/Errors'
 
-const wrapHandler = (fn: RequestHandler) => {
-  return async (req: Request, res: Response, next: NextFunction) => {
+const wrapHandler = <P>(fn: RequestHandler<P>) => {
+  return async (req: Request<P>, res: Response, next: NextFunction) => {
     try {
       await fn(req, res, next)
     } catch (error) {
