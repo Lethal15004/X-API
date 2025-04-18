@@ -29,6 +29,8 @@ model Users {
   avatar               String @default("")
   coverPhoto           String @default("")
   refreshTokens        Refresh_Tokens[]
+  followers            Followers[] @relation("FollowedRelation")      // Những người theo dõi mình
+  followings           Followers[] @relation("FollowingRelation")     // Những người mình theo dõi
 }
 
 model Refresh_Tokens{
@@ -36,6 +38,15 @@ model Refresh_Tokens{
   token                String
   createdAt            DateTime @default(now())
   expiresAt            DateTime @db.Timestamp() @map("expiresAt")
-  userId              String @db.ObjectId
+  userId               String @db.ObjectId
   user                 Users @relation(fields: [userId],references: [id])
+}
+
+model Followers{
+  id                   String @id @map("_id") @default(auto()) @db.ObjectId
+  userId               String @db.ObjectId
+  followedUserId       String @db.ObjectId
+  createdAt            DateTime @default(now())
+  user                 Users @relation("FollowingRelation", fields: [userId], references: [id])
+  followedUser         Users @relation("FollowedRelation", fields: [followedUserId], references: [id])
 }

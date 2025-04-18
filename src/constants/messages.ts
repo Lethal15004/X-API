@@ -9,6 +9,9 @@ const USERS_MESSAGES = {
   GET_ME_SUCCESS: 'Get my profile success',
   GET_ME_FAILED: 'Get my profile failed',
 
+  // Id
+  INVALID_FOLLOWED_USER_ID: 'Invalid followed user id',
+
   // Date
   DATE_REQUIRED: 'Date is required',
   INVALID_DATE_FORMAT: 'Invalid date format. Must be (YYYY-MM-DD)',
@@ -66,6 +69,12 @@ const USERS_MESSAGES = {
   COVER_PHOTO_TOO_SHORT: 'Cover photo is too short',
   COVER_PHOTO_TOO_LONG: 'Cover photo is too long',
 
+  // Follow
+  FOLLOW_USER_ID_REQUIRED: 'User id is required too follow',
+  CANNOT_FOLLOW_YOURSELF: 'Cannot follow yourself',
+  FOLLOWED_USER_NOT_FOUND: 'Followed user not found',
+  ALREADY_FOLLOWED_BEFORE: 'Already followed this user before',
+
   // JSON
   LOGIN_SUCCESS: 'User login success',
   REGISTER_SUCCESS: 'User register success',
@@ -77,6 +86,9 @@ const USERS_MESSAGES = {
   UPDATE_FAILED: 'User update failed',
   GET_PROFILE_SUCCESS: 'Get profile success',
   GET_PROFILE_FAILED: 'Get profile failed',
+  FOLLOW_SUCCESS: 'Follow success',
+  FOLLOW_FAILED: 'Follow failed',
+  ALREADY_FOLLOW: 'Already follow this user',
 
   // Access token
   ACCESS_TOKEN_REQUIRED: 'Access token is required',

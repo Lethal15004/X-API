@@ -4,7 +4,7 @@ import { inject, injectable } from 'inversify'
 
 // Constants
 import USERS_MESSAGES from '~/constants/messages'
-import HTTP_STATUS from '~/constants/httpStatus'
+import HTTP_STATUS from '~/constants/http-status'
 import { TYPES_SERVICE } from '~/constants/types'
 
 // Interfaces
@@ -165,6 +165,22 @@ export class UserController {
     } else {
       res.status(HTTP_STATUS.UNAUTHORIZED).json({
         message: USERS_MESSAGES.RESET_PASSWORD_FAILED
+      })
+    }
+  }
+
+  public follow = async (req: Request<ParamsDictionary, any, UserFollowBody>, res: Response) => {
+    const result = await this.UserService.follow(
+      req.body.followedUserId as string,
+      req.decoded_authorization as TokenPayload
+    )
+    if (result) {
+      res.status(HTTP_STATUS.OK).json({
+        message: USERS_MESSAGES.FOLLOW_SUCCESS
+      })
+    } else {
+      res.status(HTTP_STATUS.UNAUTHORIZED).json({
+        message: USERS_MESSAGES.FOLLOW_FAILED
       })
     }
   }

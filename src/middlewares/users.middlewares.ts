@@ -1,15 +1,15 @@
 import { Request, Response, NextFunction } from 'express'
-import { ZodSchema, ZodError } from 'zod'
+import { ZodSchema } from 'zod'
 import { inject, injectable } from 'inversify'
 
 // Constants
 import { TYPES_SERVICE } from '~/constants/types'
 import { TokenType, UserVerifyStatus } from '~/constants/enums'
-import HTTP_STATUS from '~/constants/httpStatus'
+import HTTP_STATUS from '~/constants/http-status'
 
 // Utils
-import throwErrors from '~/utils/throwErrors.utils'
-import { splitAccessToken } from '~/utils/splitToken.utils'
+import throwErrors from '~/utils/throw-errors.utils'
+import { splitAccessToken } from '~/utils/split-token.utils'
 
 // Interfaces
 import { IAuthService } from '~/interfaces/IAuthService'

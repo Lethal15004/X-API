@@ -17,4 +17,5 @@ export interface IUserService {
     forgotPasswordToken: string,
     password: string
   ): Promise<boolean>
+  follow(followedUserId: string, decoded_authorization: TokenPayload): Promise<boolean>
 }

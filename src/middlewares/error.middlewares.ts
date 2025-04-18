@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
 
 // Constants
-import HTTP_STATUS from '~/constants/httpStatus'
+import HTTP_STATUS from '~/constants/http-status'
 
 // Models
 import { ErrorEntity, ErrorWithStatus } from '~/models/Errors'

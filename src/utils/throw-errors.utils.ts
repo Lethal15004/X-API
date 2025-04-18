@@ -2,10 +2,10 @@
 import { ErrorWithStatus } from '~/models/Errors'
 
 // Constants
-import { errorMap } from '~/constants/errors'
+import { ErrorMap } from '~/constants/errors'
 
 const throwErrors = (type: ErrorType) => {
-  const error = errorMap[type]
+  const error = ErrorMap[type]
   throw new ErrorWithStatus(error)
 }
 

@@ -1,8 +1,8 @@
 // Constants
 import USERS_MESSAGES from '~/constants/messages'
-import HTTP_STATUS from '~/constants/httpStatus'
+import HTTP_STATUS from '~/constants/http-status'
 
-export const errorMap = {
+export const ErrorMap = {
   USER_NOT_FOUND: {
     message: USERS_MESSAGES.USER_NOT_FOUND,
     status: HTTP_STATUS.NOT_FOUND
@@ -54,5 +54,21 @@ export const errorMap = {
   USER_NOT_VERIFIED: {
     message: USERS_MESSAGES.USER_NOT_VERIFIED,
     status: HTTP_STATUS.FORBIDDEN
+  },
+  INVALID_FOLLOWED_USER_ID: {
+    message: USERS_MESSAGES.INVALID_FOLLOWED_USER_ID,
+    status: HTTP_STATUS.NOT_FOUND
+  },
+  CANNOT_FOLLOW_YOURSELF: {
+    message: USERS_MESSAGES.CANNOT_FOLLOW_YOURSELF,
+    status: HTTP_STATUS.BAD_REQUEST
+  },
+  FOLLOWED_USER_NOT_FOUND: {
+    message: USERS_MESSAGES.FOLLOWED_USER_NOT_FOUND,
+    status: HTTP_STATUS.NOT_FOUND
+  },
+  ALREADY_FOLLOWED_BEFORE: {
+    message: USERS_MESSAGES.ALREADY_FOLLOWED_BEFORE,
+    status: HTTP_STATUS.CONFLICT
   }
 } as const

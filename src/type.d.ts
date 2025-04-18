@@ -13,11 +13,12 @@ import {
   UserForgotPasswordSchema,
   UserVerifyForgotPasswordSchema,
   UserResetPasswordSchema,
-  UserUpdateSchema
+  UserUpdateSchema,
+  UserFollowSchema
 } from './models/schemas/users.schemas'
 
 // Models prisma
-import { Users, RefreshTokens } from '@prisma/client'
+import { Users, RefreshTokens, Followers } from '@prisma/client'
 
 declare global {
   // Type Error
@@ -35,6 +36,10 @@ declare global {
     | 'EMAIL_ALREADY_VERIFIED_BEFORE'
     | 'INVALID_FORGOT_PASSWORD_TOKEN'
     | 'USER_NOT_VERIFIED'
+    | 'INVALID_FOLLOWED_USER_ID'
+    | 'CANNOT_FOLLOW_YOURSELF'
+    | 'FOLLOWED_USER_NOT_FOUND'
+    | 'ALREADY_FOLLOWED_BEFORE'
 
   // Type Request
   type UserRegisterBody = z.infer<typeof UserRegisterSchema>
@@ -50,6 +55,7 @@ declare global {
   type UserGetProfileParams = {
     username: string
   }
+  type UserFollowBody = z.infer<typeof UserFollowSchema>
 
   type TokenPayload = jwt.JwtPayload & {
     userId: string
@@ -60,6 +66,7 @@ declare global {
   // Type Model
   type UserModel = Users
   type RefreshTokenModel = RefreshTokens
+  type FollowersModel = Followers
 }
 declare module 'express' {
   interface Request {

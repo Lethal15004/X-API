@@ -13,7 +13,8 @@ import {
   UserRegisterSchema,
   UserLoginSchema,
   UserForgotPasswordSchema,
-  UserUpdateSchema
+  UserUpdateSchema,
+  UserFollowSchema
 } from '~/models/schemas/users.schemas'
 
 // Utils
@@ -73,4 +74,13 @@ router.post(
   wrapHandler(userMiddleware.resetPasswordValidator()),
   wrapHandler(userController.resetPassword)
 )
+
+router.post(
+  '/follow',
+  wrapHandler(userMiddleware.accessTokenValidator()),
+  wrapHandler(userMiddleware.verifiedUserValidator),
+  wrapHandler(userMiddleware.defaultValidator(UserFollowSchema)),
+  wrapHandler(userController.follow)
+)
+
 export default router

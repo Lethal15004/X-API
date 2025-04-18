@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { ObjectId } from 'mongodb'
 
 // Constants
 import USERS_MESSAGES from '~/constants/messages'
@@ -111,3 +112,14 @@ export const UserUpdateSchema = z
       .trim()
   })
   .partial() // optional
+
+export const UserFollowSchema = z
+  .object({
+    followedUserId: z
+      .string({
+        required_error: USERS_MESSAGES.FOLLOW_USER_ID_REQUIRED
+      })
+      .nonempty(USERS_MESSAGES.FOLLOW_USER_ID_REQUIRED)
+      .trim() // Xóa khoảng trắng ở đầu và cuối
+  })
+  .strict()

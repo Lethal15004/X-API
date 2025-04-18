@@ -3,12 +3,13 @@ import { omit } from 'lodash'
 
 // Utils
 import * as bcryptPassword from '~/utils/bcrypt.utils'
-import throwErrors from '~/utils/throwErrors.utils'
+import throwErrors from '~/utils/throw-errors.utils'
 import excludeFields from '~/utils/sanitize.utils'
 
 // Constants
 import { TYPES_SERVICE } from '~/constants/types'
 import { TokenType, UserVerifyStatus } from '~/constants/enums'
+import { DbTables } from '~/constants/db-tables.enum'
 
 // Interfaces
 import { IUserService } from '~/interfaces/IUserService'
@@ -43,7 +44,7 @@ export class UserService implements IUserService {
   }
 
   public async getProfile(username: string): Promise<UserModel> {
-    const user = await this.PrismaService.findUnique<UserModel>('users', { username: username })
+    const user = await this.PrismaService.findUnique<UserModel>(DbTables.USERS, { username: username })
     if (!user) {
       throwErrors('USER_NOT_FOUND')
     }
@@ -61,7 +62,7 @@ export class UserService implements IUserService {
   public async updateMe(userId: string, payload: UserUpdateBody): Promise<UserModel> {
     const [user, userUpdated] = await Promise.all([
       this.checkUserExist(userId as string),
-      this.PrismaService.update<UserModel>('users', { id: userId }, payload)
+      this.PrismaService.update<UserModel>(DbTables.USERS, { id: userId }, payload)
     ])
     const newUser = excludeFields(userUpdated as UserModel, ['password', 'emailVerifiedToken', 'forgotPasswordToken'])
     return newUser as UserModel
@@ -88,7 +89,7 @@ export class UserService implements IUserService {
       emailVerifiedToken: emailVerifiedToken,
       password: bcryptPassword.hashPassword(user.password)
     }
-    const newUser = await this.PrismaService.create<UserModel>('users', userData)
+    const newUser = await this.PrismaService.create<UserModel>(DbTables.USERS, userData)
 
     const { accessToken, refreshToken } = await this.createTokens(newUser.id, UserVerifyStatus.Unverified)
 
@@ -134,7 +135,7 @@ export class UserService implements IUserService {
     if (!isExist) {
       throwErrors('USED_REFRESH_TOKEN_OR_NOT_EXISTS')
     }
-    await this.PrismaService.deleteMany('refresh_Tokens', { token: refreshToken })
+    await this.PrismaService.deleteMany(DbTables.REFRESH_TOKENS, { token: refreshToken })
     return true
   }
 
@@ -153,7 +154,7 @@ export class UserService implements IUserService {
     const [token] = await Promise.all([
       this.createTokens(userId, UserVerifyStatus.Verified),
       await this.PrismaService.update<UserModel>(
-        'users',
+        DbTables.USERS,
         { id: userId },
         { emailVerifiedToken: '', verifyStatus: UserVerifyStatus.Verified }
       )
@@ -179,7 +180,11 @@ export class UserService implements IUserService {
     console.log('Resend verify email: ', emailVerifiedToken)
 
     // Update
-    await this.PrismaService.update<UserModel>('users', { id: userId }, { emailVerifiedToken: emailVerifiedToken })
+    await this.PrismaService.update<UserModel>(
+      DbTables.USERS,
+      { id: userId },
+      { emailVerifiedToken: emailVerifiedToken }
+    )
     return true
   }
 
@@ -191,7 +196,7 @@ export class UserService implements IUserService {
       userExist?.verifyStatus as UserVerifyStatus
     )
     await this.PrismaService.update<UserModel>(
-      'users',
+      DbTables.USERS,
       { id: userExist?.id },
       { forgotPasswordToken: forgotPasswordToken }
     )
@@ -225,16 +230,52 @@ export class UserService implements IUserService {
       throwErrors('INVALID_FORGOT_PASSWORD_TOKEN')
     }
     await this.PrismaService.update<UserModel>(
-      'users',
+      DbTables.USERS,
       { id: user?.id },
       { forgotPasswordToken: '', password: bcryptPassword.hashPassword(password) }
     )
     return true
   }
+  public async follow(followedUserId: string, decoded_authorization: TokenPayload): Promise<boolean> {
+    if (!ObjectId.isValid(followedUserId)) {
+      throwErrors('INVALID_FOLLOWED_USER_ID')
+    }
+    const currentUserId = decoded_authorization.userId
+
+    if (followedUserId === currentUserId) {
+      throwErrors('CANNOT_FOLLOW_YOURSELF')
+    }
+
+    const [userFollowed, userFollowing, isFollowed] = await Promise.all([
+      this.PrismaService.findUnique<UserModel>(DbTables.USERS, { id: followedUserId }),
+      this.PrismaService.findUnique<UserModel>(DbTables.USERS, { id: decoded_authorization.userId }),
+      this.PrismaService.findFirst<FollowersModel>(DbTables.FOLLOWERS, {
+        userId: currentUserId,
+        followedUserId: followedUserId
+      })
+    ])
+
+    if (isFollowed) {
+      throwErrors('ALREADY_FOLLOWED_BEFORE')
+    }
+
+    if (!userFollowed) {
+      throwErrors('FOLLOWED_USER_NOT_FOUND')
+    }
+    if (!userFollowing) {
+      throwErrors('USER_NOT_FOUND')
+    }
+
+    await this.PrismaService.create<FollowersModel>(DbTables.FOLLOWERS, {
+      userId: currentUserId,
+      followedUserId: followedUserId
+    })
+    return true
+  }
 
   // Functions help for service
   private async checkEmailExist(email: string): Promise<UserModel | null> {
-    const isExist = await this.PrismaService.findUnique<UserModel>('users', { email })
+    const isExist = await this.PrismaService.findUnique<UserModel>(DbTables.USERS, { email })
     return isExist
   }
 
@@ -246,7 +287,7 @@ export class UserService implements IUserService {
   }
 
   private async checkUserExist(userId: string): Promise<UserModel | null> {
-    const user = await this.PrismaService.findUnique<UserModel>('users', { id: userId })
+    const user = await this.PrismaService.findUnique<UserModel>(DbTables.USERS, { id: userId })
     if (!user) {
       throwErrors('USER_NOT_FOUND')
     }
@@ -291,7 +332,7 @@ export class UserService implements IUserService {
   }
 
   private async saveRefreshToken(refreshToken: string, userId: string): Promise<void> {
-    await this.PrismaService.create<RefreshTokenModel>('refresh_Tokens', {
+    await this.PrismaService.create<RefreshTokenModel>(DbTables.REFRESH_TOKENS, {
       expiresAt: new Date(Date.now() + this.REFRESH_TOKEN_EXPIRES),
       token: refreshToken,
       userId
@@ -299,6 +340,6 @@ export class UserService implements IUserService {
   }
 
   private async isExistRefreshToken(refreshToken: string): Promise<RefreshTokenModel> {
-    return await this.PrismaService.findFirst<RefreshTokenModel>('refresh_Tokens', { token: refreshToken })
+    return await this.PrismaService.findFirst<RefreshTokenModel>(DbTables.REFRESH_TOKENS, { token: refreshToken })
   }
 }
