@@ -78,5 +78,9 @@ export const ErrorMap = {
   ALREADY_UNFOLLOWED_BEFORE: {
     message: USERS_MESSAGES.ALREADY_UNFOLLOWED_BEFORE,
     status: HTTP_STATUS.CONFLICT
+  },
+  PASSWORD_NOT_MATCH: {
+    message: USERS_MESSAGES.PASSWORD_NOT_MATCH,
+    status: HTTP_STATUS.BAD_REQUEST
   }
 } as const

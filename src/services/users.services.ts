@@ -268,6 +268,16 @@ export class UserService implements IUserService {
     return true
   }
 
+  public async changePassword(oldPassword: string, newPassword: string, userId: string): Promise<boolean> {
+    const user = await this.checkUserExist(userId)
+    if (!bcryptPassword.verifyPassword(oldPassword, user?.password as string)) {
+      throwErrors('PASSWORD_NOT_MATCH')
+    }
+    const hashedNewPassword = bcryptPassword.hashPassword(newPassword)
+    await this.PrismaService.update<UserModel>(DbTables.USERS, { id: userId }, { password: hashedNewPassword })
+    return true
+  }
+
   // Functions help for service
   private async checkEmailExist(email: string): Promise<UserModel | null> {
     const isExist = await this.PrismaService.findUnique<UserModel>(DbTables.USERS, { email })

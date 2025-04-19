@@ -15,7 +15,8 @@ import {
   UserResetPasswordSchema,
   UserUpdateSchema,
   UserFollowSchema,
-  UserUnfollowSchema
+  UserUnfollowSchema,
+  UserChangePasswordSchema
 } from './models/schemas/users.schemas'
 
 // Models prisma
@@ -43,6 +44,7 @@ declare global {
     | 'ALREADY_FOLLOWED_BEFORE'
     | 'CANNOT_UNFOLLOW_YOURSELF'
     | 'ALREADY_UNFOLLOWED_BEFORE'
+    | 'PASSWORD_NOT_MATCH'
 
   // Type Request
   type UserRegisterBody = z.infer<typeof UserRegisterSchema>
@@ -55,6 +57,7 @@ declare global {
   type UserVerifyForgotPasswordBody = z.infer<typeof UserVerifyForgotPasswordSchema>
   type UserResetPasswordBody = z.infer<typeof UserResetPasswordSchema>
   type UserUpdateBody = z.infer<typeof UserUpdateSchema>
+  type UserChangePasswordBody = z.infer<typeof UserChangePasswordSchema>
   type UserGetProfileParams = {
     username: string
   }

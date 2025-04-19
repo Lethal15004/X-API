@@ -200,4 +200,21 @@ export class UserController {
       })
     }
   }
+
+  public changePassword = async (req: Request<ParamsDictionary, any, UserChangePasswordBody>, res: Response) => {
+    const result = await this.UserService.changePassword(
+      req.body.oldPassword as string,
+      req.body.password as string,
+      req.decoded_authorization?.userId as string
+    )
+    if (result) {
+      res.status(HTTP_STATUS.OK).json({
+        message: USERS_MESSAGES.CHANGE_PASSWORD_SUCCESS
+      })
+    } else {
+      res.status(HTTP_STATUS.UNAUTHORIZED).json({
+        message: USERS_MESSAGES.CHANGE_PASSWORD_FAILED
+      })
+    }
+  }
 }

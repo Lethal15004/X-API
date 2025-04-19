@@ -15,7 +15,8 @@ import {
   UserForgotPasswordSchema,
   UserUpdateSchema,
   UserFollowSchema,
-  UserUnfollowSchema
+  UserUnfollowSchema,
+  UserChangePasswordSchema
 } from '~/models/schemas/users.schemas'
 
 // Utils
@@ -90,6 +91,14 @@ router.delete(
   wrapHandler(userMiddleware.verifiedUserValidator),
   wrapHandler(userMiddleware.defaultValidator(UserUnfollowSchema, 'params')),
   wrapHandler(userController.unfollow)
+)
+
+router.put(
+  '/change-password',
+  wrapHandler(userMiddleware.accessTokenValidator()),
+  wrapHandler(userMiddleware.verifiedUserValidator),
+  wrapHandler(userMiddleware.defaultValidator(UserChangePasswordSchema)),
+  wrapHandler(userController.changePassword)
 )
 
 export default router

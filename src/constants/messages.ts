@@ -34,6 +34,7 @@ const USERS_MESSAGES = {
   PASSWORD_REQUIRED: 'Password is required',
   PASSWORD_CANNOT_BE_EMPTY: 'Password cannot be empty',
   PASSWORD_INCORRECT: 'Password is incorrect',
+  PASSWORD_NOT_MATCH: 'Password is not correct',
 
   // Confirm password
   CONFIRM_PASSWORD_REQUIRED: 'Confirm password is required',
@@ -93,6 +94,8 @@ const USERS_MESSAGES = {
   ALREADY_FOLLOW: 'Already follow this user',
   UNFOLLOW_SUCCESS: 'Unfollow success',
   UNFOLLOW_FAILED: 'Unfollow failed',
+  CHANGE_PASSWORD_SUCCESS: 'Change password success',
+  CHANGE_PASSWORD_FAILED: 'Change password failed',
 
   // Access token
   ACCESS_TOKEN_REQUIRED: 'Access token is required',

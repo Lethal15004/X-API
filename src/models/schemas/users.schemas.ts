@@ -120,3 +120,15 @@ export const UserUnfollowSchema = z
     unfollowedUserId: userIdSchema
   })
   .strict()
+
+export const UserChangePasswordSchema = z
+  .object({
+    oldPassword: passwordSchema,
+    password: passwordSchema,
+    confirm_password: confirmPasswordSchema
+  })
+  .strict()
+  .refine((data) => data.password === data.confirm_password, {
+    message: USERS_MESSAGES.CONFIRM_PASSWORD_NOT_MATCH,
+    path: ['confirm_password']
+  })
