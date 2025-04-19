@@ -169,9 +169,9 @@ export class UserController {
     }
   }
 
-  public follow = async (req: Request<ParamsDictionary, any, UserFollowBody>, res: Response) => {
+  public follow = async (req: Request<UserFollowParams>, res: Response) => {
     const result = await this.UserService.follow(
-      req.body.followedUserId as string,
+      req.params.followedUserId as string,
       req.decoded_authorization as TokenPayload
     )
     if (result) {
@@ -181,6 +181,22 @@ export class UserController {
     } else {
       res.status(HTTP_STATUS.UNAUTHORIZED).json({
         message: USERS_MESSAGES.FOLLOW_FAILED
+      })
+    }
+  }
+
+  public unfollow = async (req: Request<UserUnfollowParams>, res: Response) => {
+    const result = await this.UserService.unfollow(
+      req.params.unfollowedUserId as string,
+      req.decoded_authorization as TokenPayload
+    )
+    if (result) {
+      res.status(HTTP_STATUS.OK).json({
+        message: USERS_MESSAGES.UNFOLLOW_SUCCESS
+      })
+    } else {
+      res.status(HTTP_STATUS.UNAUTHORIZED).json({
+        message: USERS_MESSAGES.UNFOLLOW_FAILED
       })
     }
   }

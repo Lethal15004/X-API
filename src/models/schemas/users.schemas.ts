@@ -1,10 +1,10 @@
 import { z } from 'zod'
-import { ObjectId } from 'mongodb'
 
 // Constants
 import USERS_MESSAGES from '~/constants/messages'
 import {
   nameSchema,
+  userIdSchema,
   dateOfBirthSchema,
   passwordSchema,
   emailSchema,
@@ -90,12 +90,7 @@ export const UserResetPasswordSchema = z
 export const UserUpdateSchema = z
   .object({
     name: z.string().min(3, USERS_MESSAGES.NAME_TOO_SHORT).max(50, USERS_MESSAGES.NAME_TOO_LONG).trim(), // Xóa khoảng trắng ở đầu và cuối
-    dateOfBirth: z
-      .string()
-      .regex(/^\d{4}-\d{2}-\d{2}$/, {
-        message: USERS_MESSAGES.INVALID_DATE_FORMAT
-      })
-      .transform((val) => new Date(`${val}T00:00:00.000Z`)),
+    dateOfBirth: dateOfBirthSchema,
     bio: z.string().min(1, USERS_MESSAGES.BIO_TOO_SHORT).max(255, USERS_MESSAGES.BIO_TOO_LONG).trim(),
     location: z.string().min(1, USERS_MESSAGES.LOCATION_TOO_SHORT).max(255, USERS_MESSAGES.LOCATION_TOO_LONG).trim(),
     website: z.string().min(1, USERS_MESSAGES.WEBSITE_TOO_SHORT).max(255, USERS_MESSAGES.WEBSITE_TOO_LONG).trim(),
@@ -115,11 +110,12 @@ export const UserUpdateSchema = z
 
 export const UserFollowSchema = z
   .object({
-    followedUserId: z
-      .string({
-        required_error: USERS_MESSAGES.FOLLOW_USER_ID_REQUIRED
-      })
-      .nonempty(USERS_MESSAGES.FOLLOW_USER_ID_REQUIRED)
-      .trim() // Xóa khoảng trắng ở đầu và cuối
+    followedUserId: userIdSchema
+  })
+  .strict()
+
+export const UserUnfollowSchema = z
+  .object({
+    unfollowedUserId: userIdSchema
   })
   .strict()

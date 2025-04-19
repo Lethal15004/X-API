@@ -10,7 +10,7 @@ const USERS_MESSAGES = {
   GET_ME_FAILED: 'Get my profile failed',
 
   // Id
-  INVALID_FOLLOWED_USER_ID: 'Invalid followed user id',
+  INVALID_USER_ID: 'Invalid followed user id',
 
   // Date
   DATE_REQUIRED: 'Date is required',
@@ -72,8 +72,10 @@ const USERS_MESSAGES = {
   // Follow
   FOLLOW_USER_ID_REQUIRED: 'User id is required too follow',
   CANNOT_FOLLOW_YOURSELF: 'Cannot follow yourself',
+  CANNOT_UNFOLLOW_YOURSELF: 'Cannot unfollow yourself',
   FOLLOWED_USER_NOT_FOUND: 'Followed user not found',
   ALREADY_FOLLOWED_BEFORE: 'Already followed this user before',
+  ALREADY_UNFOLLOWED_BEFORE: 'Already unfollowed this user before',
 
   // JSON
   LOGIN_SUCCESS: 'User login success',
@@ -89,6 +91,8 @@ const USERS_MESSAGES = {
   FOLLOW_SUCCESS: 'Follow success',
   FOLLOW_FAILED: 'Follow failed',
   ALREADY_FOLLOW: 'Already follow this user',
+  UNFOLLOW_SUCCESS: 'Unfollow success',
+  UNFOLLOW_FAILED: 'Unfollow failed',
 
   // Access token
   ACCESS_TOKEN_REQUIRED: 'Access token is required',

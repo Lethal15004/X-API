@@ -18,4 +18,5 @@ export interface IUserService {
     password: string
   ): Promise<boolean>
   follow(followedUserId: string, decoded_authorization: TokenPayload): Promise<boolean>
+  unfollow(unfollowedUserId: string, decoded_authorization: TokenPayload): Promise<boolean>
 }

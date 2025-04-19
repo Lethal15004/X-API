@@ -60,8 +60,7 @@ export class UserService implements IUserService {
   }
 
   public async updateMe(userId: string, payload: UserUpdateBody): Promise<UserModel> {
-    const [user, userUpdated] = await Promise.all([
-      this.checkUserExist(userId as string),
+    const [userUpdated] = await Promise.all([
       this.PrismaService.update<UserModel>(DbTables.USERS, { id: userId }, payload)
     ])
     const newUser = excludeFields(userUpdated as UserModel, ['password', 'emailVerifiedToken', 'forgotPasswordToken'])
@@ -236,39 +235,30 @@ export class UserService implements IUserService {
     )
     return true
   }
+
   public async follow(followedUserId: string, decoded_authorization: TokenPayload): Promise<boolean> {
-    if (!ObjectId.isValid(followedUserId)) {
-      throwErrors('INVALID_FOLLOWED_USER_ID')
-    }
     const currentUserId = decoded_authorization.userId
-
-    if (followedUserId === currentUserId) {
-      throwErrors('CANNOT_FOLLOW_YOURSELF')
-    }
-
-    const [userFollowed, userFollowing, isFollowed] = await Promise.all([
-      this.PrismaService.findUnique<UserModel>(DbTables.USERS, { id: followedUserId }),
-      this.PrismaService.findUnique<UserModel>(DbTables.USERS, { id: decoded_authorization.userId }),
-      this.PrismaService.findFirst<FollowersModel>(DbTables.FOLLOWERS, {
-        userId: currentUserId,
-        followedUserId: followedUserId
-      })
-    ])
-
-    if (isFollowed) {
+    const { followRelation } = await this.validateFollowOperation(followedUserId, currentUserId, 'follow')
+    if (followRelation) {
       throwErrors('ALREADY_FOLLOWED_BEFORE')
     }
-
-    if (!userFollowed) {
-      throwErrors('FOLLOWED_USER_NOT_FOUND')
-    }
-    if (!userFollowing) {
-      throwErrors('USER_NOT_FOUND')
-    }
-
     await this.PrismaService.create<FollowersModel>(DbTables.FOLLOWERS, {
       userId: currentUserId,
       followedUserId: followedUserId
+    })
+
+    return true
+  }
+
+  public async unfollow(unfollowedUserId: string, decoded_authorization: TokenPayload): Promise<boolean> {
+    const currentUserId = decoded_authorization.userId
+    const { followRelation } = await this.validateFollowOperation(unfollowedUserId, currentUserId, 'unfollow')
+
+    if (!followRelation) {
+      throwErrors('ALREADY_UNFOLLOWED_BEFORE')
+    }
+    await this.PrismaService.deleteFirst(DbTables.FOLLOWERS, {
+      id: followRelation?.id
     })
     return true
   }
@@ -341,5 +331,33 @@ export class UserService implements IUserService {
 
   private async isExistRefreshToken(refreshToken: string): Promise<RefreshTokenModel> {
     return await this.PrismaService.findFirst<RefreshTokenModel>(DbTables.REFRESH_TOKENS, { token: refreshToken })
+  }
+
+  private async validateFollowOperation(targetUserId: string, currentUserId: string, type: 'follow' | 'unfollow') {
+    if (!ObjectId.isValid(targetUserId)) {
+      throwErrors('INVALID_USER_ID')
+    }
+    if (targetUserId == currentUserId) {
+      if (type == 'follow') {
+        throwErrors('CANNOT_FOLLOW_YOURSELF')
+      } else {
+        throwErrors('CANNOT_UNFOLLOW_YOURSELF')
+      }
+    }
+
+    const [currentUser, targetUser, followRelation] = await Promise.all([
+      this.PrismaService.findUnique<UserModel>(DbTables.USERS, { id: currentUserId }),
+      this.PrismaService.findUnique<UserModel>(DbTables.USERS, { id: targetUserId }),
+      this.PrismaService.findFirst<FollowersModel>(DbTables.FOLLOWERS, {
+        userId: currentUserId,
+        followedUserId: targetUserId
+      })
+    ])
+
+    if (!targetUser || !currentUser) {
+      throwErrors('USER_NOT_FOUND')
+    }
+
+    return { targetUser, followRelation }
   }
 }

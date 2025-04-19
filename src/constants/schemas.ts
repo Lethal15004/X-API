@@ -62,3 +62,10 @@ export const accessTokenSchema = z
     message: USERS_MESSAGES.INVALID_ACCESS_TOKEN
   })
   .transform((bearer) => bearer.split(' ')[1])
+
+export const userIdSchema = z
+  .string({
+    required_error: USERS_MESSAGES.FOLLOW_USER_ID_REQUIRED
+  })
+  .nonempty(USERS_MESSAGES.FOLLOW_USER_ID_REQUIRED)
+  .trim() // Xóa khoảng trắng ở đầu và cuối

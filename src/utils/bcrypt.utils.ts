@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt' //Nhúng module bcrypt để mã hóa mật khẩu
 export const hashPassword = (password: string): string => {
-  const salt = bcrypt.genSaltSync(12)
+  const salt = bcrypt.genSaltSync(8)
   const newPassword = bcrypt.hashSync(password, salt)
   return newPassword
 }

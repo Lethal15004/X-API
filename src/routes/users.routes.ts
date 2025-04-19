@@ -14,7 +14,8 @@ import {
   UserLoginSchema,
   UserForgotPasswordSchema,
   UserUpdateSchema,
-  UserFollowSchema
+  UserFollowSchema,
+  UserUnfollowSchema
 } from '~/models/schemas/users.schemas'
 
 // Utils
@@ -76,11 +77,19 @@ router.post(
 )
 
 router.post(
-  '/follow',
+  '/follow/:followedUserId',
   wrapHandler(userMiddleware.accessTokenValidator()),
   wrapHandler(userMiddleware.verifiedUserValidator),
-  wrapHandler(userMiddleware.defaultValidator(UserFollowSchema)),
+  wrapHandler(userMiddleware.defaultValidator(UserFollowSchema, 'params')),
   wrapHandler(userController.follow)
+)
+
+router.delete(
+  '/unfollow/:unfollowedUserId',
+  wrapHandler(userMiddleware.accessTokenValidator()),
+  wrapHandler(userMiddleware.verifiedUserValidator),
+  wrapHandler(userMiddleware.defaultValidator(UserUnfollowSchema, 'params')),
+  wrapHandler(userController.unfollow)
 )
 
 export default router

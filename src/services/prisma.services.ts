@@ -46,6 +46,12 @@ export class PrismaService implements IPrismaService {
       where
     })
   }
+  public async deleteFirst(model: string, where: any): Promise<void> {
+    this.checkModelExist(model)
+    await (this.prisma as any)[model].delete({
+      where
+    })
+  }
 
   private checkModelExist(model: string): void {
     if (!(this.prisma as any)[model]) {

@@ -14,7 +14,8 @@ import {
   UserVerifyForgotPasswordSchema,
   UserResetPasswordSchema,
   UserUpdateSchema,
-  UserFollowSchema
+  UserFollowSchema,
+  UserUnfollowSchema
 } from './models/schemas/users.schemas'
 
 // Models prisma
@@ -36,10 +37,12 @@ declare global {
     | 'EMAIL_ALREADY_VERIFIED_BEFORE'
     | 'INVALID_FORGOT_PASSWORD_TOKEN'
     | 'USER_NOT_VERIFIED'
-    | 'INVALID_FOLLOWED_USER_ID'
+    | 'INVALID_USER_ID'
     | 'CANNOT_FOLLOW_YOURSELF'
     | 'FOLLOWED_USER_NOT_FOUND'
     | 'ALREADY_FOLLOWED_BEFORE'
+    | 'CANNOT_UNFOLLOW_YOURSELF'
+    | 'ALREADY_UNFOLLOWED_BEFORE'
 
   // Type Request
   type UserRegisterBody = z.infer<typeof UserRegisterSchema>
@@ -55,8 +58,8 @@ declare global {
   type UserGetProfileParams = {
     username: string
   }
-  type UserFollowBody = z.infer<typeof UserFollowSchema>
-
+  type UserFollowParams = z.infer<typeof UserFollowSchema>
+  type UserUnfollowParams = z.infer<typeof UserUnfollowSchema>
   type TokenPayload = jwt.JwtPayload & {
     userId: string
     tokenType: TokenType
