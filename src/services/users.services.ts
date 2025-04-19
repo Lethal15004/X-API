@@ -60,9 +60,13 @@ export class UserService implements IUserService {
   }
 
   public async updateMe(userId: string, payload: UserUpdateBody): Promise<UserModel> {
-    const [userUpdated] = await Promise.all([
+    const [isExistUser, userUpdated] = await Promise.all([
+      this.PrismaService.findFirst<UserModel>(DbTables.USERS, { id: userId }),
       this.PrismaService.update<UserModel>(DbTables.USERS, { id: userId }, payload)
     ])
+    if (!isExistUser) {
+      throwErrors('USER_NOT_FOUND')
+    }
     const newUser = excludeFields(userUpdated as UserModel, ['password', 'emailVerifiedToken', 'forgotPasswordToken'])
     return newUser as UserModel
   }
@@ -86,7 +90,8 @@ export class UserService implements IUserService {
       ...this.DEFAULT_USER_DATA,
       id: userId,
       emailVerifiedToken: emailVerifiedToken,
-      password: bcryptPassword.hashPassword(user.password)
+      password: bcryptPassword.hashPassword(user.password),
+      username: `username_${userId}`
     }
     const newUser = await this.PrismaService.create<UserModel>(DbTables.USERS, userData)
 

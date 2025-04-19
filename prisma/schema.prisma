@@ -25,7 +25,7 @@ model Users {
   bio                  String @default("")
   location             String @default("")
   website              String @default("")
-  username             String @unique @default(cuid())
+  username             String @unique
   avatar               String @default("")
   coverPhoto           String @default("")
   refreshTokens        Refresh_Tokens[]

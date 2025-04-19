@@ -12,6 +12,7 @@ import {
   refreshTokenSchema,
   accessTokenSchema
 } from '~/constants/schemas'
+import { REGEX_USERNAME } from '~/constants/regex'
 
 // Define schema
 export const UserRegisterSchema = z
@@ -98,7 +99,7 @@ export const UserUpdateSchema = z
       .string()
       .min(3, USERS_MESSAGES.USER_NAME_TOO_SHORT)
       .max(30, USERS_MESSAGES.USER_NAME_TOO_LONG)
-      .regex(/^[a-zA-Z0-9_]+$/, USERS_MESSAGES.USERNAME_INVALID),
+      .regex(REGEX_USERNAME, USERS_MESSAGES.USERNAME_INVALID),
     avatar: z.string().min(1, USERS_MESSAGES.AVATAR_TOO_SHORT).max(400, USERS_MESSAGES.AVATAR_TOO_LONG).trim(),
     coverPhoto: z
       .string()
