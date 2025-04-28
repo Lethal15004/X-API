@@ -69,6 +69,14 @@ export class UserController {
     }
   }
 
+  public oauth = async (req: Request, res: Response) => {
+    // Get code from query
+    const { code } = req.query
+    const result = await this.UserService.oauth(code as string)
+    const urlRedirect = `${process.env.CLIENT_REDIRECT_CALLBACK}?access_token=${result.accessToken}&refresh_token=${result.refreshToken}&new_user=${result.newUser}&verify=${result.verify}`
+    return res.redirect(urlRedirect)
+  }
+
   public login = async (req: Request<ParamsDictionary, any, UserLoginBody>, res: Response) => {
     const userExist = await this.UserService.login(req.body)
     if (userExist) {

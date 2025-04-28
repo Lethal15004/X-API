@@ -82,5 +82,13 @@ export const ErrorMap = {
   PASSWORD_NOT_MATCH: {
     message: USERS_MESSAGES.PASSWORD_NOT_MATCH,
     status: HTTP_STATUS.BAD_REQUEST
+  },
+  EMAIL_REQUIRED: {
+    message: USERS_MESSAGES.EMAIL_REQUIRED,
+    status: HTTP_STATUS.BAD_REQUEST
+  },
+  GMAIL_NOT_VERIFIED: {
+    message: USERS_MESSAGES.GMAIL_NOT_VERIFIED,
+    status: HTTP_STATUS.BAD_REQUEST
   }
 } as const

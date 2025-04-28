@@ -1,5 +1,6 @@
 import { injectable, inject } from 'inversify'
 import { omit } from 'lodash'
+import axios from 'axios'
 
 // Utils
 import * as bcryptPassword from '~/utils/bcrypt.utils'
@@ -59,6 +60,36 @@ export class UserService implements IUserService {
     return newUser as UserModel
   }
 
+  public async oauth(
+    code: string
+  ): Promise<{ newUser: boolean; accessToken: string; refreshToken: string; verify: UserVerifyStatus }> {
+    const { id_token, access_token } = await this.getOauthGoogleToken(code as string)
+    const userInfo = await this.getGoogleUserInfo(access_token, id_token)
+    if (!userInfo.verified_email) {
+      throwErrors('GMAIL_NOT_VERIFIED')
+    }
+    const isUserExist = await this.checkEmailExist(userInfo.email)
+    if (isUserExist) {
+      const { accessToken, refreshToken } = await this.createTokens(isUserExist.id, UserVerifyStatus.Verified)
+      await this.saveRefreshToken(refreshToken, isUserExist.id)
+      return {
+        accessToken,
+        refreshToken,
+        newUser: false,
+        verify: isUserExist.verifyStatus
+      }
+    } else {
+      const password = Math.random().toString(36).substring(2, 15)
+      const data = await this.register({
+        email: userInfo.email,
+        name: userInfo.name,
+        dateOfBirth: new Date(),
+        password,
+        confirm_password: password
+      })
+      return { ...omit(data, ['user']), newUser: true, verify: UserVerifyStatus.Unverified }
+    }
+  }
   public async updateMe(userId: string, payload: UserUpdateBody): Promise<UserModel> {
     const [isExistUser, userUpdated] = await Promise.all([
       this.PrismaService.findFirst<UserModel>(DbTables.USERS, { id: userId }),
@@ -374,5 +405,48 @@ export class UserService implements IUserService {
     }
 
     return { targetUser, followRelation }
+  }
+
+  // Get Token from Google
+  private async getOauthGoogleToken(code: string) {
+    const body = {
+      code,
+      client_id: process.env.GOOGLE_CLIENT_ID,
+      client_secret: process.env.GOOGLE_CLIENT_SECRET,
+      redirect_uri: process.env.GOOGLE_REDIRECT_URI,
+      grant_type: 'authorization_code'
+    }
+
+    // Post to google to get data include AccessToken,RefreshToken....
+    const { data } = await axios.post('https://oauth2.googleapis.com/token', body, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    })
+    return data as {
+      access_token: string
+      id_token: string
+    }
+  }
+  private async getGoogleUserInfo(access_token: string, id_token: string) {
+    const { data } = await axios.get('https://www.googleapis.com/oauth2/v1/userinfo', {
+      params: {
+        access_token,
+        alt: 'json'
+      },
+      headers: {
+        Authorization: `Bearer ${id_token}`
+      }
+    })
+    return data as {
+      id: string
+      email: string
+      verified_email: boolean
+      name: string
+      given_name: string
+      family_name: string
+      picture: string
+      locale: string
+    }
   }
 }

@@ -28,6 +28,7 @@ const userMiddleware = container.get<UserMiddleware>(UserMiddleware)
 
 router.get('/me', wrapHandler(userMiddleware.accessTokenValidator()), wrapHandler(userController.getMe))
 router.get('/:username', wrapHandler(userController.getProfile))
+router.get('/oauth/google', wrapHandler(userController.oauth))
 
 router.patch(
   '/me',

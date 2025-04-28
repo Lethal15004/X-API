@@ -50,6 +50,9 @@ const USERS_MESSAGES = {
   INVALID_EMAIL_FORMAT: 'Invalid email format',
   EMAIL_CANNOT_BE_EMPTY: 'Email cannot be empty',
 
+  // Gmail
+  GMAIL_NOT_VERIFIED: 'Gmail is not verified',
+
   // Bio
   BIO_TOO_SHORT: 'Bio is too short',
   BIO_TOO_LONG: 'Bio is too long',
@@ -96,6 +99,7 @@ const USERS_MESSAGES = {
   UNFOLLOW_FAILED: 'Unfollow failed',
   CHANGE_PASSWORD_SUCCESS: 'Change password success',
   CHANGE_PASSWORD_FAILED: 'Change password failed',
+  CANNOT_ACCESS_GOOGLE: 'Cannot access to google',
 
   // Access token
   ACCESS_TOKEN_REQUIRED: 'Access token is required',

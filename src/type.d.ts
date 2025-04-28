@@ -45,6 +45,8 @@ declare global {
     | 'CANNOT_UNFOLLOW_YOURSELF'
     | 'ALREADY_UNFOLLOWED_BEFORE'
     | 'PASSWORD_NOT_MATCH'
+    | 'EMAIL_REQUIRED'
+    | 'GMAIL_NOT_VERIFIED'
 
   // Type Request
   type UserRegisterBody = z.infer<typeof UserRegisterSchema>

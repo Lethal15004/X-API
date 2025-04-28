@@ -1,3 +1,4 @@
+import { UserVerifyStatus } from '~/constants/enums'
 export interface IUserService {
   getMe(userId: string): Promise<UserModel>
   getProfile(username: string): Promise<UserModel>
@@ -20,4 +21,7 @@ export interface IUserService {
   follow(followedUserId: string, decoded_authorization: TokenPayload): Promise<boolean>
   unfollow(unfollowedUserId: string, decoded_authorization: TokenPayload): Promise<boolean>
   changePassword(oldPassword: string, newPassword: string, userId: string): Promise<boolean>
+  oauth(
+    code: string
+  ): Promise<{ newUser: boolean; accessToken: string; refreshToken: string; verify: UserVerifyStatus }>
 }
