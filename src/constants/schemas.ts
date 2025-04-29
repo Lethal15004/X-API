@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 // Constants
-import USERS_MESSAGES from '~/constants/messages'
+import { USERS_MESSAGES } from '~/constants/messages'
 
 // Define schema for help
 

@@ -1,5 +1,5 @@
 // Constants
-import USERS_MESSAGES from '~/constants/messages'
+import { USERS_MESSAGES } from '~/constants/messages'
 import HTTP_STATUS from '~/constants/http-status'
 
 export const ErrorMap = {

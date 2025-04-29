@@ -3,7 +3,7 @@ import { ParamsDictionary } from 'express-serve-static-core'
 import { inject, injectable } from 'inversify'
 
 // Constants
-import USERS_MESSAGES from '~/constants/messages'
+import { USERS_MESSAGES } from '~/constants/messages'
 import HTTP_STATUS from '~/constants/http-status'
 import { TYPES_SERVICE } from '~/constants/types'
 

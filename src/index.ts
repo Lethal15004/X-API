@@ -10,6 +10,10 @@ const port: number | string = `${process.env.PORT}`
 // Error Handler
 import defaultErrorHandler from '~/middlewares/error.middlewares'
 
+// Init Upload Folder
+import initFolder from './utils/file.utils'
+initFolder()
+
 app.use(express.json())
 routesAPI(app)
 

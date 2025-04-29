@@ -1,4 +1,4 @@
-const USERS_MESSAGES = {
+export const USERS_MESSAGES = {
   // Error
   UNAUTHORIZED_ERROR: 'Unauthorized',
   VALIDATION_ERROR: 'Validation error',
@@ -132,4 +132,8 @@ const USERS_MESSAGES = {
   RESET_PASSWORD_FAILED: 'Reset password failed'
 } as const
 
-export default USERS_MESSAGES
+export const MEDIAS_MESSAGES = {
+  // JSON
+  UPLOAD_IMAGE_SUCCESS: 'Upload image successfully',
+  UPLOAD_IMAGE_FAILED: 'Upload image failed'
+} as const

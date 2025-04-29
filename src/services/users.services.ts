@@ -1,6 +1,7 @@
 import { injectable, inject } from 'inversify'
 import { omit } from 'lodash'
 import axios from 'axios'
+import { ObjectId } from 'mongodb'
 
 // Utils
 import * as bcryptPassword from '~/utils/bcrypt.utils'
@@ -16,7 +17,6 @@ import { DbTables } from '~/constants/db-tables.enum'
 import { IUserService } from '~/interfaces/IUserService'
 import { IAuthService } from '~/interfaces/IAuthService'
 import { IPrismaService } from '~/interfaces/IPrismaService'
-import { ObjectId } from 'mongodb'
 
 // Class Service
 @injectable()
