@@ -11,7 +11,7 @@ import excludeFields from '~/utils/sanitize.utils'
 // Constants
 import { TYPES_SERVICE } from '~/constants/types'
 import { TokenType, UserVerifyStatus } from '~/constants/enums'
-import { DbTables } from '~/constants/db-tables.enum'
+import { DbTables } from '~/constants/db-tables'
 
 // Interfaces
 import { IUserService } from '~/interfaces/IUserService'

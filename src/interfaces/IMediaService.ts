@@ -1,5 +1,5 @@
 import { IncomingMessage } from 'http'
 
 export interface IMediaService {
-  uploadImage(req: IncomingMessage): Promise<boolean>
+  uploadImage(req: IncomingMessage): PromiseLike<string>
 }

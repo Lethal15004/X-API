@@ -1,11 +1,14 @@
 import 'reflect-metadata'
 import express, { Express } from 'express'
 import dotenv from 'dotenv'
-import routesAPI from '~/routes/index.routes'
+
 dotenv.config()
 
 const app: Express = express()
 const port: number | string = `${process.env.PORT}`
+
+// Routes
+import routesAPI from '~/routes/index.routes'
 
 // Error Handler
 import defaultErrorHandler from '~/middlewares/error.middlewares'

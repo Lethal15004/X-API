@@ -137,3 +137,6 @@ dist
 
 # private key
 secret.key
+
+# custom
+uploads/

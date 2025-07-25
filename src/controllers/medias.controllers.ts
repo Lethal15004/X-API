@@ -17,9 +17,11 @@ export class MediaController {
 
   public uploadSingleImage = async (req: Request, res: Response) => {
     const result = await this.MediaService.uploadImage(req as IncomingMessage)
+    console.log(result)
     if (result) {
       res.status(HTTP_STATUS.OK).json({
-        message: MEDIAS_MESSAGES.UPLOAD_IMAGE_SUCCESS
+        message: MEDIAS_MESSAGES.UPLOAD_IMAGE_SUCCESS,
+        result: result
       })
     } else {
       res.status(HTTP_STATUS.BAD_REQUEST).json({
