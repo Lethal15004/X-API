@@ -18,6 +18,7 @@ import {
   UserUnfollowSchema,
   UserChangePasswordSchema
 } from './models/schemas/users.schemas'
+import { NameImage, NameVideo } from './models/schemas/static.schemas'
 
 // Models prisma
 import { Users, RefreshTokens, Followers } from '@prisma/client'
@@ -70,6 +71,8 @@ declare global {
     tokenType: TokenType
     verifyStatus: UserVerifyStatus
   }
+  type NameImageParams = z.infer<typeof NameImage>
+  type NameVideoParams = z.infer<typeof NameVideo>
 
   // Type Model
   type UserModel = Users

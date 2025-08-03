@@ -11,5 +11,6 @@ export const TYPES_MIDDLEWARE = {
 
 export const TYPES_CONTROLLER = {
   UserController: Symbol.for('UserController'),
-  MediaController: Symbol.for('MediaController')
+  MediaController: Symbol.for('MediaController'),
+  StaticController: Symbol.for('StaticController')
 } as const

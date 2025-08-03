@@ -15,9 +15,8 @@ import { IMediaService } from '~/interfaces/IMediaService'
 export class MediaController {
   constructor(@inject(TYPES_SERVICE.MediaService) private readonly MediaService: IMediaService) {}
 
-  public uploadSingleImage = async (req: Request, res: Response) => {
-    const result = await this.MediaService.uploadImage(req as IncomingMessage)
-    console.log(result)
+  public uploadImages = async (req: Request, res: Response) => {
+    const result = await this.MediaService.uploadImages(req as IncomingMessage)
     if (result) {
       res.status(HTTP_STATUS.OK).json({
         message: MEDIAS_MESSAGES.UPLOAD_IMAGE_SUCCESS,
@@ -26,6 +25,20 @@ export class MediaController {
     } else {
       res.status(HTTP_STATUS.BAD_REQUEST).json({
         message: MEDIAS_MESSAGES.UPLOAD_IMAGE_FAILED
+      })
+    }
+  }
+
+  public uploadVideo = async (req: Request, res: Response) => {
+    const result = await this.MediaService.uploadVideo(req as IncomingMessage)
+    if (result) {
+      res.status(HTTP_STATUS.OK).json({
+        message: MEDIAS_MESSAGES.UPLOAD_VIDEO_SUCCESS,
+        result: result
+      })
+    } else {
+      res.status(HTTP_STATUS.BAD_REQUEST).json({
+        message: MEDIAS_MESSAGES.UPLOAD_VIDEO_FAILED
       })
     }
   }

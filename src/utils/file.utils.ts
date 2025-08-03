@@ -2,15 +2,16 @@ import fs from 'fs'
 import path from 'path'
 
 // Constants
-import { UPLOAD_TEMP_DIR } from '~/constants/dir'
+import { UPLOAD_IMAGE_TEMP_DIR, UPLOAD_VIDEO_TEMP_DIR } from '~/constants/dir'
 
 const initFolder = () => {
-  const uploadFolderPath = UPLOAD_TEMP_DIR
-  if (!fs.existsSync(uploadFolderPath)) {
-    fs.mkdirSync(uploadFolderPath, {
-      recursive: true // Create folder nested
-    })
-  }
+  ;[UPLOAD_IMAGE_TEMP_DIR, UPLOAD_VIDEO_TEMP_DIR].forEach((dir) => {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, {
+        recursive: true
+      })
+    }
+  })
 }
 
 export const getFileName = (nameFile: string): string => {

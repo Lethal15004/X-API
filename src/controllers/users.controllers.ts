@@ -60,9 +60,9 @@ export class UserController {
     if (userExist) {
       res.status(HTTP_STATUS.CREATED).json({
         message: USERS_MESSAGES.REGISTER_SUCCESS,
-        id: userExist.user.id,
         accessToken: userExist.accessToken,
-        refreshToken: userExist.refreshToken
+        refreshToken: userExist.refreshToken,
+        emailVerifyToken: userExist.user.emailVerifiedToken
       })
     } else {
       res.status(HTTP_STATUS.BAD_REQUEST).json({ message: USERS_MESSAGES.REGISTER_FAILED })
@@ -74,7 +74,7 @@ export class UserController {
     const { code } = req.query
     const result = await this.UserService.oauth(code as string)
     const urlRedirect = `${process.env.CLIENT_REDIRECT_CALLBACK}?access_token=${result.accessToken}&refresh_token=${result.refreshToken}&new_user=${result.newUser}&verify=${result.verify}`
-    return res.redirect(urlRedirect)
+    return res.redirect(`${process.env.SWAGGER_REDIRECT}`)
   }
 
   public login = async (req: Request<ParamsDictionary, any, UserLoginBody>, res: Response) => {
@@ -82,7 +82,6 @@ export class UserController {
     if (userExist) {
       res.status(HTTP_STATUS.OK).json({
         message: USERS_MESSAGES.LOGIN_SUCCESS,
-        id: userExist.user.id,
         accessToken: userExist.accessToken,
         refreshToken: userExist.refreshToken
       })
@@ -107,9 +106,7 @@ export class UserController {
     const result = await this.UserService.emailVerify(req.decoded_email_verify_token as TokenPayload)
     if (result) {
       res.status(HTTP_STATUS.OK).json({
-        message: USERS_MESSAGES.VERIFIED_EMAIL_SUCCESS,
-        accessToken: result.accessToken,
-        refreshToken: result.refreshToken
+        message: USERS_MESSAGES.VERIFIED_EMAIL_SUCCESS
       })
     } else {
       res.status(HTTP_STATUS.BAD_REQUEST).json({ message: USERS_MESSAGES.VERIFIED_EMAIL_FAILED })
@@ -117,10 +114,11 @@ export class UserController {
   }
 
   public resendEmailVerify = async (req: Request, res: Response) => {
-    const result = await this.UserService.resendEmailVerify(req.decoded_authorization as TokenPayload)
-    if (result) {
+    const emailVerifyToken = await this.UserService.resendEmailVerify(req.decoded_authorization as TokenPayload)
+    if (emailVerifyToken) {
       res.status(HTTP_STATUS.OK).json({
-        message: USERS_MESSAGES.RESEND_VERIFY_EMAIL_SUCCESS
+        message: USERS_MESSAGES.RESEND_VERIFY_EMAIL_SUCCESS,
+        emailVerifyToken: emailVerifyToken
       })
     } else {
       res.status(HTTP_STATUS.BAD_REQUEST).json({ message: USERS_MESSAGES.RESEND_VERIFY_EMAIL_FAILED })

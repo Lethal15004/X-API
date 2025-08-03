@@ -135,5 +135,10 @@ export const USERS_MESSAGES = {
 export const MEDIAS_MESSAGES = {
   // JSON
   UPLOAD_IMAGE_SUCCESS: 'Upload image successfully',
-  UPLOAD_IMAGE_FAILED: 'Upload image failed'
+  UPLOAD_IMAGE_FAILED: 'Upload image failed',
+  UPLOAD_VIDEO_SUCCESS: 'Upload video successfully',
+  UPLOAD_VIDEO_FAILED: 'Upload video failed',
+
+  // File
+  FILE_NOT_FOUND: 'File cannot find'
 } as const

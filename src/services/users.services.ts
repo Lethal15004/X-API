@@ -201,7 +201,7 @@ export class UserService implements IUserService {
     }
   }
 
-  public async resendEmailVerify(decoded_authorization: TokenPayload): Promise<boolean> {
+  public async resendEmailVerify(decoded_authorization: TokenPayload): Promise<string> {
     const { userId } = decoded_authorization
     const user = await this.checkUserExist(userId)
 
@@ -220,7 +220,7 @@ export class UserService implements IUserService {
       { id: userId },
       { emailVerifiedToken: emailVerifiedToken }
     )
-    return true
+    return emailVerifiedToken
   }
 
   public async forgotPassword(email: string): Promise<boolean> {

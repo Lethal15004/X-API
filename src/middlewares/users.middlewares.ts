@@ -62,6 +62,7 @@ export class UserMiddleware {
   public verifyEmailValidator = (source: 'body' | 'query' | 'params' | 'headers' = 'body') => {
     return async (req: Request, res: Response, next: NextFunction) => {
       const { emailVerifyToken } = req[source]
+      console.log(emailVerifyToken)
       const rs = await UserVerifyEmailSchema.safeParseAsync({ emailVerifyToken })
       if (!rs.success) {
         throw new ErrorWithStatus({

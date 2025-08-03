@@ -17,6 +17,7 @@ import { IMediaService } from './interfaces/IMediaService'
 // Controllers
 import { UserController } from './controllers/users.controllers'
 import { MediaController } from './controllers/medias.controllers'
+import { StaticController } from './controllers/static.controllers'
 
 // Middlewares
 import { UserMiddleware } from './middlewares/users.middlewares'
@@ -35,5 +36,6 @@ container.bind<UserMiddleware>(UserMiddleware).toSelf().inSingletonScope()
 // Controllers no need Interface
 container.bind<UserController>(UserController).toSelf().inSingletonScope()
 container.bind<MediaController>(MediaController).toSelf().inSingletonScope()
+container.bind<StaticController>(StaticController).toSelf().inSingletonScope()
 
 export default container

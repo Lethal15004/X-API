@@ -49,8 +49,8 @@ router.post('/login', wrapHandler(userMiddleware.defaultValidator(UserLoginSchem
 router.post('/logout', wrapHandler(userMiddleware.logOutValidator()), wrapHandler(userController.logout))
 
 router.post(
-  '/verify-email',
-  wrapHandler(userMiddleware.verifyEmailValidator()),
+  '/verify-email/:emailVerifyToken',
+  wrapHandler(userMiddleware.verifyEmailValidator('params')),
   wrapHandler(userController.emailVerify)
 )
 

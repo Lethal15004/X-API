@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 // Constants
-import { USERS_MESSAGES } from '~/constants/messages'
+import { USERS_MESSAGES, MEDIAS_MESSAGES } from '~/constants/messages'
 
 // Define schema for help
 
@@ -69,3 +69,18 @@ export const userIdSchema = z
   })
   .nonempty(USERS_MESSAGES.FOLLOW_USER_ID_REQUIRED)
   .trim() // Xóa khoảng trắng ở đầu và cuối
+
+// 2. Static
+export const nameImage = z
+  .string({
+    required_error: MEDIAS_MESSAGES.FILE_NOT_FOUND
+  })
+  .nonempty(MEDIAS_MESSAGES.FILE_NOT_FOUND)
+  .trim()
+
+export const nameVideo = z
+  .string({
+    required_error: MEDIAS_MESSAGES.FILE_NOT_FOUND
+  })
+  .nonempty(MEDIAS_MESSAGES.FILE_NOT_FOUND)
+  .trim()
