@@ -4,7 +4,7 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "npx nodemon --development",
-    "build": "npx rimraf ./dist && tsc && tsc-alias",
+    "build": "rimraf ./dist && tsc && tsc-alias",
     "start": "node dist/index.js --production",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -29,9 +29,11 @@
     "minimist": "^1.2.8",
     "mongodb": "^6.14.2",
     "reflect-metadata": "^0.2.2",
+    "rimraf": "^6.0.1",
     "sharp": "^0.34.3",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
+    "tsc-alias": "^1.8.16",
     "zod": "^3.24.2"
   },
   "devDependencies": {
@@ -52,8 +54,6 @@
     "nodemon": "^3.1.9",
     "prettier": "^3.5.2",
     "prisma": "^6.4.1",
-    "rimraf": "^6.0.1",
-    "tsc-alias": "^1.8.16",
     "tsx": "^4.19.3",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.25.0"
