@@ -78,7 +78,64 @@ export class UserController {
 
     try {
       const result = await this.UserService.oauth(code as string)
-      res.status(200).json(result)
+
+      // Create HTML to apply token
+      const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Authentication Successful</title>
+        <style>
+          body { font-family: Arial, sans-serif; text-align: center; padding: 30px; }
+          .token-box { background: #f5f5f5; padding: 15px; margin: 20px auto; border-radius: 5px; word-break: break-all; }
+          button { background: #4285f4; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
+        </style>
+      </head>
+      <body>
+        <h2>Authentication Successful! 🎉</h2>
+        <p>Your access token:</p>
+        <div class="token-box">${result.accessToken}</div>
+        
+        <button id="applyToken">Apply Token & Close</button>
+        <p>Click the button above to automatically apply this token to Swagger UI.</p>
+        
+        <script>
+          // Get token and opener window (Swagger UI)
+          const token = "${result.accessToken}";
+          const opener = window.opener;
+          
+          // Function to apply token to Swagger UI
+          function applyTokenToSwagger() {
+            if (opener) {
+              // Find bearerAuth input in the parent window
+              const inputElement = opener.document.querySelector('input[type="text"][data-component="security-definition-bearer-value"]');
+              
+              if (inputElement) {
+                // Set token value
+                inputElement.value = token;
+                
+                // Find and click the Authorize button
+                const authorizeButton = inputElement.closest('.modal-ux').querySelector('.auth-btn-wrapper button.btn');
+                if (authorizeButton) {
+                  authorizeButton.click();
+                }
+                
+                // Close this popup
+                window.close();
+              } else {
+                alert("Couldn't find bearerAuth input in Swagger UI. Please copy and paste the token manually.");
+              }
+            }
+          }
+          
+          // Add click event for the button
+          document.getElementById('applyToken').addEventListener('click', applyTokenToSwagger);
+        </script>
+      </body>
+      </html>
+    `
+      res.setHeader('Content-Type', 'text/html')
+      res.send(html)
     } catch (error) {
       console.error('OAuth error:', error)
       res.status(401).json({ message: 'Authentication failed', error })
