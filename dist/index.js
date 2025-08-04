@@ -51,7 +51,7 @@ const file_utils_1 = __importDefault(require("./utils/file.utils"));
 const swaggerSpec = (0, swagger_jsdoc_1.default)(swaggerOptions);
 const swaggerUiOptions = {
     swaggerOptions: {
-        oauth2RedirectUrl: process.env.GOOGLE_REDIRECT_URI,
+        oauth2RedirectUrl: config_1.isProduction ? process.env.GOOGLE_REDIRECT_URI_PRODUCTION : process.env.GOOGLE_REDIRECT_URI,
         persistAuthorization: true,
         docExpansion: 'list',
         defaultModelsExpandDepth: -1

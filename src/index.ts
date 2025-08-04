@@ -54,7 +54,7 @@ initFolder()
 const swaggerSpec = swaggerJSDoc(swaggerOptions)
 const swaggerUiOptions = {
   swaggerOptions: {
-    oauth2RedirectUrl: process.env.GOOGLE_REDIRECT_URI,
+    oauth2RedirectUrl: isProduction ? process.env.GOOGLE_REDIRECT_URI_PRODUCTION : process.env.GOOGLE_REDIRECT_URI,
     persistAuthorization: true,
     docExpansion: 'list',
     defaultModelsExpandDepth: -1
