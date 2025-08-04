@@ -81,49 +81,82 @@ export class UserController {
     try {
       console.log('Getting OAuth token with code')
       const result = await this.UserService.oauth(code as string)
-      console.log('OAuth successful, creating HTML response')
-      res.setHeader('Content-Type', 'text/html')
-      res.setHeader('Cache-Control', 'no-store')
-      res.setHeader('Access-Control-Allow-Origin', '*') // hoặc origin cụ thể
-      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-      res.setHeader('Referrer-Policy', 'no-referrer-when-downgrade')
-      // Create html to show token
-      const html = `
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Authentication Successful</title>
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; padding: 30px; }
-    .token-box { background: #f5f5f5; padding: 15px; margin: 20px auto; border-radius: 5px; word-break: break-all; text-align: left; }
-    .copy-btn { background: #4285f4; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
-  </style>
-</head>
-<body>
-  <h2>Authentication Successful! 🎉</h2>
-  <p>Your access token:</p>
-  <div class="token-box" id="token">${result.accessToken}</div>
-  
-  <button class="copy-btn" onclick="copyToken()">Copy Token</button>
-  <p>Please copy this token and paste it into the bearerAuth field in Swagger UI.</p>
-  
-  <script>
-    function copyToken() {
-      const tokenText = document.getElementById('token').innerText;
-      navigator.clipboard.writeText(tokenText)
-        .then(() => alert('Token copied to clipboard!'))
-        .catch(err => console.error('Error copying token:', err));
-    }
-  </script>
-</body>
-</html>
-`
+      console.log('OAuth successful')
 
-      // Đảm bảo các header được đặt đúng
-      res.setHeader('Content-Type', 'text/html')
-      res.setHeader('Cache-Control', 'no-store')
-      res.send(html)
+      const referer = req.headers.referer || ''
+      const userAgent = req.headers['user-agent'] || ''
+      const isSwaggerRedirect =
+        referer.includes('oauth2-redirect.html') || req.query.state?.toString().includes('swagger')
+
+      if (isSwaggerRedirect) {
+        const html = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Authentication Successful</title>
+        </head>
+        <body>
+          <script>
+            // This script will run in the oauth2-redirect.html context
+            window.onload = function() {
+              // Create URL with fragment containing the token
+              const redirectUrl = window.location.origin + '/api-docs/oauth2-redirect.html'
+                  + '#access_token=${result.accessToken}'
+                  + '&token_type=Bearer'
+                  + '&state=${req.query.state || ''}'
+                  + '&expires_in=3600'
+                  + '&scope=email%20profile';
+              
+              // Redirect to the Swagger UI oauth2-redirect handler
+              window.location.href = redirectUrl;
+            }
+          </script>
+          <p>Authenticating...</p>
+        </body>
+        </html>
+      `
+
+        res.setHeader('Content-Type', 'text/html')
+        res.send(html)
+      } else {
+        // For direct access - show token in a nice HTML page
+        const html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Authentication Successful</title>
+          <style>
+            body { font-family: Arial, sans-serif; text-align: center; padding: 30px; }
+            .token-box { background: #f5f5f5; padding: 15px; margin: 20px auto; border-radius: 5px; word-break: break-all; text-align: left; }
+            .copy-btn { background: #4285f4; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
+          </style>
+        </head>
+        <body>
+          <h2>Authentication Successful! 🎉</h2>
+          <p>Your access token:</p>
+          <div class="token-box" id="token">${result.accessToken}</div>
+          
+          <button class="copy-btn" onclick="copyToken()">Copy Token</button>
+          <p>Please copy this token and paste it into the bearerAuth field in Swagger UI.</p>
+          
+          <script>
+            function copyToken() {
+              const tokenText = document.getElementById('token').innerText;
+              navigator.clipboard.writeText(tokenText)
+                .then(() => alert('Token copied to clipboard!'))
+                .catch(err => console.error('Error copying token:', err));
+            }
+          </script>
+        </body>
+        </html>
+      `
+
+        res.setHeader('Content-Type', 'text/html')
+        res.setHeader('Cache-Control', 'no-store')
+        res.send(html)
+      }
     } catch (error) {
       console.error('OAuth error details:', error)
       res.status(401).json({
