@@ -39,7 +39,7 @@ const swaggerOptions = {
           type: 'oauth2',
           flows: {
             authorizationCode: {
-              authorizationUrl: 'https://accounts.google.com/o/oauth2/auth',
+              authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
               tokenUrl: 'https://oauth2.googleapis.com/token',
               scopes: {
                 email: 'View your email address',
@@ -75,6 +75,7 @@ app.use(
 // Swagger setup
 const swaggerSpec = swaggerJSDoc(swaggerOptions)
 const swaggerUiOptions = {
+  oauth2RedirectUrl: isProduction ? process.env.GOOGLE_REDIRECT_URI_PRODUCTION : process.env.GOOGLE_REDIRECT_URI,
   swaggerOptions: {
     oauth2RedirectUrl: isProduction ? process.env.GOOGLE_REDIRECT_URI_PRODUCTION : process.env.GOOGLE_REDIRECT_URI,
     persistAuthorization: true,
