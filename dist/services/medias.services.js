@@ -19,9 +19,15 @@ const path_1 = __importDefault(require("path"));
 const sharp_1 = __importDefault(require("sharp"));
 const fs_1 = __importDefault(require("fs"));
 const dotenv_1 = __importDefault(require("dotenv"));
+const cloudinary_1 = require("cloudinary");
 dotenv_1.default.config();
 // Configs
 const config_1 = require("../config/config");
+cloudinary_1.v2.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
 // Constants
 const dir_1 = require("../constants/dir");
 const file_utils_1 = require("../utils/file.utils");
@@ -54,10 +60,14 @@ let MediaService = class MediaService {
                     const newNameFile = (0, file_utils_1.getFileName)(file.newFilename);
                     const newPath = path_1.default.resolve(dir_1.UPLOAD_IMAGE_DIR, `${newNameFile}.jpg`);
                     await (0, sharp_1.default)(file.filepath).jpeg().toFile(newPath);
+                    // Upload to Cloudinary
+                    const result = await cloudinary_1.v2.uploader.upload(file.filepath, {
+                        folder: 'twitter-clone/images'
+                    });
                     fs_1.default.unlinkSync(file.filepath);
                     return {
                         url: config_1.isProduction
-                            ? `${process.env.HOST}/static/images/${newNameFile}`
+                            ? result.secure_url
                             : `http://localhost:${process.env.PORT}/static/images/${newNameFile}`,
                         type: enums_1.MediaType.Image
                     };
@@ -89,10 +99,12 @@ let MediaService = class MediaService {
                     return reject(new Error('File is empty'));
                 }
                 const newNameFile = (0, file_utils_1.getFileName)(files.video[0].newFilename);
+                const result = await cloudinary_1.v2.uploader.upload(files.video[0].filepath, {
+                    folder: 'twitter-clone/videos',
+                    resource_type: 'video'
+                });
                 resolve({
-                    url: config_1.isProduction
-                        ? `${process.env.HOST}/static/videos/${newNameFile}`
-                        : `http://localhost:${process.env.PORT}/static/videos/${newNameFile}`,
+                    url: config_1.isProduction ? result.secure_url : `http://localhost:${process.env.PORT}/static/videos/${newNameFile}`,
                     type: enums_1.MediaType.Video
                 });
             });
