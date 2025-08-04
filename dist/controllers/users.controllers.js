@@ -85,16 +85,16 @@ let UserController = class UserController {
         console.log('OAuth callback received:', req.query);
         const { code, state } = req.query;
         if (!code) {
-            console.log('Missing code parameter');
             res.status(400).json({ message: 'Authorization code is required' });
         }
         try {
-            console.log('Getting OAuth token with code');
             const result = await this.UserService.oauth(code);
-            console.log('OAuth successful');
             const referer = req.headers.referer || '';
-            const userAgent = req.headers['user-agent'] || '';
             const isSwaggerRedirect = referer.includes('oauth2-redirect.html') || req.query.state?.toString().includes('swagger');
+            res.cookie('accessToken', result.accessToken, {
+                maxAge: 900000,
+                httpOnly: true
+            });
             if (isSwaggerRedirect) {
                 const html = `
         <!DOCTYPE html>
@@ -128,7 +128,6 @@ let UserController = class UserController {
                 res.send(html);
             }
             else {
-                // For direct access - show token in a nice HTML page
                 const html = `
         <!DOCTYPE html>
         <html>
