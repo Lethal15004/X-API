@@ -63,7 +63,7 @@ app.use(
 const swaggerSpec = swaggerJSDoc(swaggerOptions)
 const swaggerUiOptions = {
   swaggerOptions: {
-    oauth2RedirectUrl: isProduction ? process.env.OAUTH2_REDIRECT_URL_PRODUCTION : process.env.OAUTH2_REDIRECT_URL,
+    oauth2RedirectUrl: isProduction ? process.env.GOOGLE_REDIRECT_URI_PRODUCTION : process.env.GOOGLE_REDIRECT_URI,
     persistAuthorization: true,
     docExpansion: 'list',
     defaultModelsExpandDepth: -1
