@@ -5,11 +5,17 @@ import { IncomingMessage } from 'http'
 import sharp from 'sharp'
 import fs from 'fs'
 import dotenv from 'dotenv'
+import { v2 as cloudinary } from 'cloudinary'
 
 dotenv.config()
 
 // Configs
 import { isProduction } from '~/config/config'
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+})
 
 // Constants
 import { UPLOAD_IMAGE_TEMP_DIR, UPLOAD_IMAGE_DIR, UPLOAD_VIDEO_TEMP_DIR, UPLOAD_VIDEO_DIR } from '~/constants/dir'
@@ -48,10 +54,16 @@ export class MediaService implements IMediaService {
             const newNameFile = getFileName(file.newFilename)
             const newPath = path.resolve(UPLOAD_IMAGE_DIR, `${newNameFile}.jpg`)
             await sharp(file.filepath).jpeg().toFile(newPath)
+
+            // Upload to Cloudinary
+            const result = await cloudinary.uploader.upload(file.filepath, {
+              folder: 'twitter-clone/images'
+            })
+
             fs.unlinkSync(file.filepath)
             return {
               url: isProduction
-                ? `${process.env.HOST}/static/images/${newNameFile}`
+                ? result.secure_url
                 : `http://localhost:${process.env.PORT}/static/images/${newNameFile}`,
               type: MediaType.Image
             }
@@ -84,10 +96,12 @@ export class MediaService implements IMediaService {
           return reject(new Error('File is empty'))
         }
         const newNameFile = getFileName(files.video[0].newFilename)
+        const result = await cloudinary.uploader.upload(files.video[0].filepath, {
+          folder: 'twitter-clone/videos',
+          resource_type: 'video'
+        })
         resolve({
-          url: isProduction
-            ? `${process.env.HOST}/static/videos/${newNameFile}`
-            : `http://localhost:${process.env.PORT}/static/videos/${newNameFile}`,
+          url: isProduction ? result.secure_url : `http://localhost:${process.env.PORT}/static/videos/${newNameFile}`,
           type: MediaType.Video
         })
       })
