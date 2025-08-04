@@ -3,6 +3,9 @@ import { omit } from 'lodash'
 import axios from 'axios'
 import { ObjectId } from 'mongodb'
 
+// Config
+import { isProduction } from '~/config/config'
+
 // Utils
 import * as bcryptPassword from '~/utils/bcrypt.utils'
 import throwErrors from '~/utils/throw-errors.utils'
@@ -413,7 +416,7 @@ export class UserService implements IUserService {
       code,
       client_id: process.env.GOOGLE_CLIENT_ID,
       client_secret: process.env.GOOGLE_CLIENT_SECRET,
-      redirect_uri: process.env.GOOGLE_REDIRECT_URI,
+      redirect_uri: isProduction ? process.env.GOOGLE_REDIRECT_URI_PRODUCTION : process.env.GOOGLE_REDIRECT_URI,
       grant_type: 'authorization_code'
     }
 
