@@ -144,35 +144,42 @@ export class UserController {
         res.send(html)
       } else {
         const html = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>Authentication Successful</title>
-          <style>
-            body { font-family: Arial, sans-serif; text-align: center; padding: 30px; }
-            .token-box { background: #f5f5f5; padding: 15px; margin: 20px auto; border-radius: 5px; word-break: break-all; text-align: left; }
-            .copy-btn { background: #4285f4; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
-          </style>
-        </head>
-        <body>
-          <h2>Authentication Successful! 🎉</h2>
-          <p>Your access token:</p>
-          <div class="token-box" id="token">${result.accessToken}</div>
-          
-          <button class="copy-btn" onclick="copyToken()">Copy Token</button>
-          <p>Please copy this token and paste it into the bearerAuth field in Swagger UI.</p>
-          
-          <script>
-            function copyToken() {
-              const tokenText = document.getElementById('token').innerText;
-              navigator.clipboard.writeText(tokenText)
-                .then(() => alert('Token copied to clipboard!'))
-                .catch(err => console.error('Error copying token:', err));
-            }
-          </script>
-        </body>
-        </html>
-      `
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                      <title>Authentication Successful</title>
+                      <style>
+                        body { font-family: Arial, sans-serif; text-align: center; padding: 30px; }
+                        .token-box { background: #f5f5f5; padding: 15px; margin: 20px auto; border-radius: 5px; word-break: break-all; text-align: left; }
+                        .copy-btn { background: #4285f4; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin-right: 10px; }
+                        .back-btn { background: #333; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block; margin-top: 20px; transition: background-color 0.3s; }
+                        .back-btn:hover { background: #555; }
+                        .buttons-container { margin: 20px 0; }
+                      </style>
+                    </head>
+                    <body>
+                      <h2>Authentication Successful! 🎉</h2>
+                      <p>Your access token:</p>
+                      <div class="token-box" id="token">${result.accessToken}</div>
+                      
+                      <div class="buttons-container">
+                        <button class="copy-btn" onclick="copyToken()">Copy Token</button>
+                        <a class="back-btn" href="/users/register-google">Back to Login</a>
+                      </div>
+                      
+                      <p>Please copy this token and paste it into the bearerAuth field in Swagger UI.</p>
+                      
+                      <script>
+                        function copyToken() {
+                          const tokenText = document.getElementById('token').innerText;
+                          navigator.clipboard.writeText(tokenText)
+                            .then(() => alert('Token copied to clipboard!'))
+                            .catch(err => console.error('Error copying token:', err));
+                        }
+                      </script>
+                    </body>
+                    </html>
+                    `
 
         res.setHeader('Content-Type', 'text/html')
         res.setHeader('Cache-Control', 'no-store')
