@@ -21,20 +21,33 @@ const swaggerOptions = {
       title: 'Twitter API',
       version: '1.0.0',
       description: 'Twitter API documentation'
-    }
-  },
-  servers: [
-    {
-      url: isProduction ? process.env.HOST : 'http://localhost:3000',
-      description: isProduction ? 'Production server' : 'Development server'
-    }
-  ],
-  components: {
-    securitySchemes: {
-      bearerAuth: {
-        type: 'http',
-        scheme: 'bearer',
-        bearerFormat: 'JWT'
+    },
+    servers: [
+      {
+        url: isProduction ? process.env.HOST : 'http://localhost:3000',
+        description: isProduction ? 'Production server' : 'Development server'
+      }
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT'
+        },
+        googleOAuth: {
+          type: 'oauth2',
+          flows: {
+            authorizationCode: {
+              authorizationUrl: 'https://accounts.google.com/o/oauth2/auth',
+              tokenUrl: 'https://oauth2.googleapis.com/token',
+              scopes: {
+                email: 'View your email address',
+                profile: 'View your basic profile info'
+              }
+            }
+          }
+        }
       }
     }
   },
