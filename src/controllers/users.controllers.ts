@@ -70,11 +70,19 @@ export class UserController {
   }
 
   public oauth = async (req: Request, res: Response) => {
-    // Get code from query
-    const { code } = req.query
-    const result = await this.UserService.oauth(code as string)
-    const urlRedirect = `${process.env.CLIENT_REDIRECT_CALLBACK}?access_token=${result.accessToken}&refresh_token=${result.refreshToken}&new_user=${result.newUser}&verify=${result.verify}`
-    return res.redirect(`${process.env.SWAGGER_REDIRECT}`)
+    const { code, state } = req.query
+
+    if (!code) {
+      res.status(400).json({ message: 'Authorization code is required' })
+    }
+
+    try {
+      const result = await this.UserService.oauth(code as string)
+      res.status(200).json(result)
+    } catch (error) {
+      console.error('OAuth error:', error)
+      res.status(401).json({ message: 'Authentication failed', error })
+    }
   }
 
   public login = async (req: Request<ParamsDictionary, any, UserLoginBody>, res: Response) => {

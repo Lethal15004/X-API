@@ -412,20 +412,26 @@ export class UserService implements IUserService {
 
   // Get Token from Google
   private async getOauthGoogleToken(code: string) {
-    const body = {
-      code,
-      client_id: process.env.GOOGLE_CLIENT_ID,
-      client_secret: process.env.GOOGLE_CLIENT_SECRET,
-      redirect_uri: isProduction ? process.env.GOOGLE_REDIRECT_URI_PRODUCTION : process.env.GOOGLE_REDIRECT_URI,
-      grant_type: 'authorization_code'
-    }
+    const params = new URLSearchParams()
+    params.append('code', code)
+    params.append('client_id', process.env.GOOGLE_CLIENT_ID!)
+    params.append('client_secret', process.env.GOOGLE_CLIENT_SECRET!)
+    params.append(
+      'redirect_uri',
+      isProduction ? process.env.GOOGLE_REDIRECT_URI_PRODUCTION! : process.env.GOOGLE_REDIRECT_URI!
+    )
+    const redirectUri = isProduction ? process.env.GOOGLE_REDIRECT_URI_PRODUCTION : process.env.GOOGLE_REDIRECT_URI
 
-    // Post to google to get data include AccessToken,RefreshToken....
-    const { data } = await axios.post('https://oauth2.googleapis.com/token', body, {
+    console.log('Using redirect URI:', redirectUri)
+    params.append('grant_type', 'authorization_code')
+
+    // Post to google with properly encoded form data
+    const { data } = await axios.post('https://oauth2.googleapis.com/token', params.toString(), {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     })
+
     return data as {
       access_token: string
       id_token: string
