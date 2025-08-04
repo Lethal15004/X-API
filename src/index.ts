@@ -3,6 +3,7 @@ import express, { Express } from 'express'
 import dotenv from 'dotenv'
 import swaggerJSDoc from 'swagger-jsdoc'
 import swaggerUi from 'swagger-ui-express'
+import cors from 'cors'
 
 dotenv.config()
 
@@ -49,6 +50,14 @@ import defaultErrorHandler from '~/middlewares/error.middlewares'
 // Init Upload Folder
 import initFolder from './utils/file.utils'
 initFolder()
+
+// Cors
+app.use(
+  cors({
+    origin: true,
+    credentials: true
+  })
+)
 
 // Swagger setup
 const swaggerSpec = swaggerJSDoc(swaggerOptions)

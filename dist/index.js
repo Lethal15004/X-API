@@ -8,6 +8,7 @@ const express_1 = __importDefault(require("express"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const swagger_jsdoc_1 = __importDefault(require("swagger-jsdoc"));
 const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
+const cors_1 = __importDefault(require("cors"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const port = `${process.env.PORT}`;
@@ -47,6 +48,11 @@ const error_middlewares_1 = __importDefault(require("./middlewares/error.middlew
 // Init Upload Folder
 const file_utils_1 = __importDefault(require("./utils/file.utils"));
 (0, file_utils_1.default)();
+// Cors
+app.use((0, cors_1.default)({
+    origin: true,
+    credentials: true
+}));
 // Swagger setup
 const swaggerSpec = (0, swagger_jsdoc_1.default)(swaggerOptions);
 const swaggerUiOptions = {

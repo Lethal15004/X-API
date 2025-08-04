@@ -70,52 +70,66 @@ export class UserController {
   }
 
   public oauth = async (req: Request, res: Response) => {
+    console.log('OAuth callback received:', req.query)
     const { code, state } = req.query
 
     if (!code) {
+      console.log('Missing code parameter')
       res.status(400).json({ message: 'Authorization code is required' })
-    } else {
-      try {
-        const result = await this.UserService.oauth(code as string)
+    }
 
-        // Create html to show token
-        const html = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>Authentication Successful</title>
-      <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 30px; }
-        .token-box { background: #f5f5f5; padding: 15px; margin: 20px auto; border-radius: 5px; word-break: break-all; text-align: left; }
-        .copy-btn { background: #4285f4; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
-      </style>
-    </head>
-    <body>
-      <h2>Authentication Successful! 🎉</h2>
-      <p>Your access token:</p>
-      <div class="token-box" id="token">${result.accessToken}</div>
-      
-      <button class="copy-btn" onclick="copyToken()">Copy Token</button>
-      <p>Please copy this token and paste it into the bearerAuth field in Swagger UI.</p>
-      
-      <script>
-        function copyToken() {
-          const tokenText = document.getElementById('token').innerText;
-          navigator.clipboard.writeText(tokenText)
-            .then(() => alert('Token copied to clipboard!'))
-            .catch(err => console.error('Error copying token:', err));
-        }
-      </script>
-    </body>
-    </html>
-    `
+    try {
+      console.log('Getting OAuth token with code')
+      const result = await this.UserService.oauth(code as string)
+      console.log('OAuth successful, creating HTML response')
+      res.setHeader('Content-Type', 'text/html')
+      res.setHeader('Cache-Control', 'no-store')
+      res.setHeader('Access-Control-Allow-Origin', '*') // hoặc origin cụ thể
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+      res.setHeader('Referrer-Policy', 'no-referrer-when-downgrade')
+      // Create html to show token
+      const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Authentication Successful</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding: 30px; }
+    .token-box { background: #f5f5f5; padding: 15px; margin: 20px auto; border-radius: 5px; word-break: break-all; text-align: left; }
+    .copy-btn { background: #4285f4; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h2>Authentication Successful! 🎉</h2>
+  <p>Your access token:</p>
+  <div class="token-box" id="token">${result.accessToken}</div>
+  
+  <button class="copy-btn" onclick="copyToken()">Copy Token</button>
+  <p>Please copy this token and paste it into the bearerAuth field in Swagger UI.</p>
+  
+  <script>
+    function copyToken() {
+      const tokenText = document.getElementById('token').innerText;
+      navigator.clipboard.writeText(tokenText)
+        .then(() => alert('Token copied to clipboard!'))
+        .catch(err => console.error('Error copying token:', err));
+    }
+  </script>
+</body>
+</html>
+`
 
-        res.setHeader('Content-Type', 'text/html')
-        res.send(html)
-      } catch (error) {
-        console.error('OAuth error:', error)
-        res.status(401).json({ message: 'Authentication failed', error })
-      }
+      // Đảm bảo các header được đặt đúng
+      res.setHeader('Content-Type', 'text/html')
+      res.setHeader('Cache-Control', 'no-store')
+      res.send(html)
+    } catch (error) {
+      console.error('OAuth error details:', error)
+      res.status(401).json({
+        message: 'Authentication failed',
+        error: error instanceof Error ? error.message : String(error)
+      })
     }
   }
 
