@@ -89,7 +89,6 @@ out
 
 # Nuxt.js build / generate output
 .nuxt
-dist
 
 # Gatsby files
 .cache/
@@ -138,5 +137,3 @@ dist
 # private key
 secret.key
 
-# custom
-uploads/
