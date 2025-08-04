@@ -26,7 +26,7 @@ const swaggerOptions = {
     },
     servers: [
         {
-            url: config_1.isProduction ? process.env.PRODUCTION_SERVER : 'http://localhost:3000',
+            url: config_1.isProduction ? process.env.HOST : 'http://localhost:3000',
             description: config_1.isProduction ? 'Production server' : 'Development server'
         }
     ],
@@ -57,7 +57,7 @@ app.use((0, cors_1.default)({
 const swaggerSpec = (0, swagger_jsdoc_1.default)(swaggerOptions);
 const swaggerUiOptions = {
     swaggerOptions: {
-        oauth2RedirectUrl: config_1.isProduction ? process.env.GOOGLE_REDIRECT_URI_PRODUCTION : process.env.GOOGLE_REDIRECT_URI,
+        oauth2RedirectUrl: config_1.isProduction ? process.env.OAUTH2_REDIRECT_URL_PRODUCTION : process.env.OAUTH2_REDIRECT_URL,
         persistAuthorization: true,
         docExpansion: 'list',
         defaultModelsExpandDepth: -1
