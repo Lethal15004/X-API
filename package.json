@@ -30,6 +30,7 @@
     "lodash": "^4.17.21",
     "minimist": "^1.2.8",
     "mongodb": "^6.14.2",
+    "pug": "^3.0.3",
     "reflect-metadata": "^0.2.2",
     "rimraf": "^6.0.1",
     "sharp": "^0.34.3",

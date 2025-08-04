@@ -27,8 +27,10 @@ const userController = container.get<UserController>(UserController)
 const userMiddleware = container.get<UserMiddleware>(UserMiddleware)
 
 router.get('/me', wrapHandler(userMiddleware.accessTokenValidator()), wrapHandler(userController.getMe))
+router.get('/oauth/google', wrapHandler(userController.redirectToGoogle))
+router.get('/oauth/google/callback', wrapHandler(userController.oauth))
+router.get('/register-google', userController.pageRegisterGoogle)
 router.get('/:username', wrapHandler(userController.getProfile))
-router.get('/oauth/google', wrapHandler(userController.oauth))
 
 router.patch(
   '/me',

@@ -62,7 +62,6 @@ let UserMiddleware = class UserMiddleware {
     verifyEmailValidator = (source = 'body') => {
         return async (req, res, next) => {
             const { emailVerifyToken } = req[source];
-            console.log(emailVerifyToken);
             const rs = await users_schemas_1.UserVerifyEmailSchema.safeParseAsync({ emailVerifyToken });
             if (!rs.success) {
                 throw new Errors_1.ErrorWithStatus({

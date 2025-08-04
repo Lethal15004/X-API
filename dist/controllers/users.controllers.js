@@ -26,6 +26,11 @@ let UserController = class UserController {
     constructor(UserService) {
         this.UserService = UserService;
     }
+    pageRegisterGoogle = async (req, res) => {
+        res.render('pages/oauth-google', {
+            title: 'Sign in with Google - Twitter API'
+        });
+    };
     getMe = async (req, res) => {
         const user = await this.UserService.getMe(req.decoded_authorization?.userId);
         if (user) {
@@ -81,8 +86,25 @@ let UserController = class UserController {
             res.status(http_status_1.default.BAD_REQUEST).json({ message: messages_1.USERS_MESSAGES.REGISTER_FAILED });
         }
     };
+    redirectToGoogle = async (req, res) => {
+        const rootUrl = 'https://accounts.google.com/o/oauth2/v2/auth';
+        const options = {
+            redirect_uri: process.env.GOOGLE_REDIRECT_URI || '',
+            client_id: process.env.GOOGLE_CLIENT_ID || '',
+            access_type: 'offline',
+            response_type: 'code',
+            prompt: 'consent',
+            scope: [
+                'https://www.googleapis.com/auth/userinfo.profile',
+                'https://www.googleapis.com/auth/userinfo.email'
+            ].join(' ')
+        };
+        // Generate the URL with all parameters
+        const url = `${rootUrl}?${new URLSearchParams(options).toString()}`;
+        // Redirect the user to Google's authorization URL
+        return res.redirect(url);
+    };
     oauth = async (req, res) => {
-        console.log('OAuth callback received:', req.query);
         const { code, state } = req.query;
         if (!code) {
             res.status(400).json({ message: 'Authorization code is required' });
@@ -91,10 +113,6 @@ let UserController = class UserController {
             const result = await this.UserService.oauth(code);
             const referer = req.headers.referer || '';
             const isSwaggerRedirect = referer.includes('oauth2-redirect.html') || req.query.state?.toString().includes('swagger');
-            res.cookie('accessToken', result.accessToken, {
-                maxAge: 900000,
-                httpOnly: true
-            });
             if (isSwaggerRedirect) {
                 const html = `
         <!DOCTYPE html>

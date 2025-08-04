@@ -91,7 +91,6 @@ export class MediaService implements IMediaService {
     return new Promise<object>((resolve, reject) => {
       form.parse(req, async (err, fields, files) => {
         if (err) return reject(err)
-        console.log(files)
         if (!files.video) {
           return reject(new Error('File is empty'))
         }

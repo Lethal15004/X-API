@@ -13,7 +13,11 @@ import { IUserService } from '~/interfaces/IUserService'
 @injectable()
 export class UserController {
   constructor(@inject(TYPES_SERVICE.UserService) private readonly UserService: IUserService) {}
-
+  public pageRegisterGoogle = async (req: Request, res: Response) => {
+    res.render('pages/oauth-google', {
+      title: 'Sign in with Google - Twitter API'
+    })
+  }
   public getMe = async (req: Request, res: Response) => {
     const user = await this.UserService.getMe(req.decoded_authorization?.userId as string)
     if (user) {
@@ -69,8 +73,29 @@ export class UserController {
     }
   }
 
+  public redirectToGoogle = async (req: Request, res: Response) => {
+    const rootUrl = 'https://accounts.google.com/o/oauth2/v2/auth'
+
+    const options = {
+      redirect_uri: process.env.GOOGLE_REDIRECT_URI || '',
+      client_id: process.env.GOOGLE_CLIENT_ID || '',
+      access_type: 'offline',
+      response_type: 'code',
+      prompt: 'consent',
+      scope: [
+        'https://www.googleapis.com/auth/userinfo.profile',
+        'https://www.googleapis.com/auth/userinfo.email'
+      ].join(' ')
+    }
+
+    // Generate the URL with all parameters
+    const url = `${rootUrl}?${new URLSearchParams(options).toString()}`
+
+    // Redirect the user to Google's authorization URL
+    return res.redirect(url)
+  }
+
   public oauth = async (req: Request, res: Response) => {
-    console.log('OAuth callback received:', req.query)
     const { code, state } = req.query
 
     if (!code) {
@@ -82,10 +107,6 @@ export class UserController {
       const referer = req.headers.referer || ''
       const isSwaggerRedirect =
         referer.includes('oauth2-redirect.html') || req.query.state?.toString().includes('swagger')
-      res.cookie('accessToken', result.accessToken, {
-        maxAge: 900000,
-        httpOnly: true
-      })
       if (isSwaggerRedirect) {
         const html = `
         <!DOCTYPE html>

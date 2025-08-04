@@ -17,24 +17,6 @@ export const securitySchemes = {
    *       scheme: bearer
    *       bearerFormat: JWT
    */
-  /**
-   * @swagger
-   * components:
-   *   securitySchemes:
-   *     bearerAuth:
-   *       type: http
-   *       scheme: bearer
-   *       bearerFormat: JWT
-   *     googleOAuth:
-   *       type: oauth2
-   *       flows:
-   *         authorizationCode:
-   *           authorizationUrl: https://accounts.google.com/o/oauth2/auth
-   *           tokenUrl: https://oauth2.googleapis.com/token
-   *           scopes:
-   *             email: View your email address
-   *             profile: View your basic profile info
-   */
 }
 
 export const usersPaths = {
