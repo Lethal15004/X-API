@@ -53,6 +53,8 @@ const inversify_1 = require("inversify");
 const lodash_1 = require("lodash");
 const axios_1 = __importDefault(require("axios"));
 const mongodb_1 = require("mongodb");
+// Config
+const config_1 = require("../config/config");
 // Utils
 const bcryptPassword = __importStar(require("../utils/bcrypt.utils"));
 const throw_errors_utils_1 = __importDefault(require("../utils/throw-errors.utils"));
@@ -370,7 +372,7 @@ let UserService = class UserService {
             code,
             client_id: process.env.GOOGLE_CLIENT_ID,
             client_secret: process.env.GOOGLE_CLIENT_SECRET,
-            redirect_uri: process.env.GOOGLE_REDIRECT_URI,
+            redirect_uri: config_1.isProduction ? process.env.GOOGLE_REDIRECT_URI_PRODUCTION : process.env.GOOGLE_REDIRECT_URI,
             grant_type: 'authorization_code'
         };
         // Post to google to get data include AccessToken,RefreshToken....
