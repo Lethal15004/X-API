@@ -2,6 +2,9 @@ import { Response, Request } from 'express'
 import { ParamsDictionary } from 'express-serve-static-core'
 import { inject, injectable } from 'inversify'
 
+// Configs
+import { isProduction } from '~/config/config'
+
 // Constants
 import { USERS_MESSAGES } from '~/constants/messages'
 import HTTP_STATUS from '~/constants/http-status'
@@ -76,8 +79,10 @@ export class UserController {
   public redirectToGoogle = async (req: Request, res: Response) => {
     const rootUrl = 'https://accounts.google.com/o/oauth2/v2/auth'
 
-    const options = {
-      redirect_uri: process.env.GOOGLE_REDIRECT_URI || '',
+    const redirectUri =
+      (isProduction ? process.env.GOOGLE_REDIRECT_URI_PRODUCTION : process.env.GOOGLE_REDIRECT_URI) || ''
+    const options: Record<string, string> = {
+      redirect_uri: redirectUri,
       client_id: process.env.GOOGLE_CLIENT_ID || '',
       access_type: 'offline',
       response_type: 'code',
@@ -88,10 +93,8 @@ export class UserController {
       ].join(' ')
     }
 
-    // Generate the URL with all parameters
     const url = `${rootUrl}?${new URLSearchParams(options).toString()}`
 
-    // Redirect the user to Google's authorization URL
     return res.redirect(url)
   }
 

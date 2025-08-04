@@ -17,6 +17,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserController = void 0;
 const inversify_1 = require("inversify");
+// Configs
+const config_1 = require("../config/config");
 // Constants
 const messages_1 = require("../constants/messages");
 const http_status_1 = __importDefault(require("../constants/http-status"));
@@ -88,8 +90,9 @@ let UserController = class UserController {
     };
     redirectToGoogle = async (req, res) => {
         const rootUrl = 'https://accounts.google.com/o/oauth2/v2/auth';
+        const redirectUri = (config_1.isProduction ? process.env.GOOGLE_REDIRECT_URI_PRODUCTION : process.env.GOOGLE_REDIRECT_URI) || '';
         const options = {
-            redirect_uri: process.env.GOOGLE_REDIRECT_URI || '',
+            redirect_uri: redirectUri,
             client_id: process.env.GOOGLE_CLIENT_ID || '',
             access_type: 'offline',
             response_type: 'code',
@@ -99,9 +102,7 @@ let UserController = class UserController {
                 'https://www.googleapis.com/auth/userinfo.email'
             ].join(' ')
         };
-        // Generate the URL with all parameters
         const url = `${rootUrl}?${new URLSearchParams(options).toString()}`;
-        // Redirect the user to Google's authorization URL
         return res.redirect(url);
     };
     oauth = async (req, res) => {
