@@ -152,7 +152,7 @@ let UserService = class UserService {
             (0, throw_errors_utils_1.default)('EMAIL_EXISTS');
         }
         const userId = new mongodb_1.ObjectId();
-        const emailVerifiedToken = user.emailVerifiedToken
+        const emailVerifiedToken = user.emailVerifiedToken === ''
             ? user.emailVerifiedToken
             : await this.createVerifyEmailToken(userId.toString(), enums_1.UserVerifyStatus.Unverified);
         const userData = {

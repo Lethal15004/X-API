@@ -120,10 +120,10 @@ export class UserService implements IUserService {
       throwErrors('EMAIL_EXISTS')
     }
     const userId = new ObjectId()
-    const emailVerifiedToken = user.emailVerifiedToken
-      ? user.emailVerifiedToken
-      : await this.createVerifyEmailToken(userId.toString(), UserVerifyStatus.Unverified)
-
+    const emailVerifiedToken =
+      user.emailVerifiedToken === ''
+        ? user.emailVerifiedToken
+        : await this.createVerifyEmailToken(userId.toString(), UserVerifyStatus.Unverified)
     const userData = {
       ...omit(user, ['confirm_password']),
       ...this.DEFAULT_USER_DATA,
