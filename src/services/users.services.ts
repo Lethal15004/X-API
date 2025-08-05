@@ -135,7 +135,10 @@ export class UserService implements IUserService {
     }
     const newUser = await this.PrismaService.create<UserModel>(DbTables.USERS, userData)
 
-    const { accessToken, refreshToken } = await this.createTokens(newUser.id, UserVerifyStatus.Unverified)
+    const { accessToken, refreshToken } = await this.createTokens(
+      newUser.id,
+      user.emailVerifiedToken === '' ? UserVerifyStatus.Verified : UserVerifyStatus.Unverified
+    )
 
     // Insert refresh token
     await this.saveRefreshToken(refreshToken, newUser.id)

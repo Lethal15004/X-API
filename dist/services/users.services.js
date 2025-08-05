@@ -165,7 +165,7 @@ let UserService = class UserService {
             verifyStatus: user.verifyStatus
         };
         const newUser = await this.PrismaService.create(db_tables_1.DbTables.USERS, userData);
-        const { accessToken, refreshToken } = await this.createTokens(newUser.id, enums_1.UserVerifyStatus.Unverified);
+        const { accessToken, refreshToken } = await this.createTokens(newUser.id, user.emailVerifiedToken === '' ? enums_1.UserVerifyStatus.Verified : enums_1.UserVerifyStatus.Unverified);
         // Insert refresh token
         await this.saveRefreshToken(refreshToken, newUser.id);
         return {
