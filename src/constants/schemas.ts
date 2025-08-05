@@ -31,6 +31,8 @@ export const confirmPasswordSchema = z
   .max(255, USERS_MESSAGES.CONFIRM_PASSWORD_TOO_LONG)
   .nonempty(USERS_MESSAGES.CONFIRM_PASSWORD_CANNOT_BE_EMPTY)
 
+export const verifyStatusOptional = z.number().default(0).optional()
+
 export const nameSchema = z
   .string({
     required_error: USERS_MESSAGES.NAME_REQUIRED

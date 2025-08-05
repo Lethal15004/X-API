@@ -20,6 +20,7 @@ import { DbTables } from '~/constants/db-tables'
 import { IUserService } from '~/interfaces/IUserService'
 import { IAuthService } from '~/interfaces/IAuthService'
 import { IPrismaService } from '~/interfaces/IPrismaService'
+import { verify } from 'crypto'
 
 // Class Service
 @injectable()
@@ -88,7 +89,8 @@ export class UserService implements IUserService {
         name: userInfo.name,
         dateOfBirth: new Date(),
         password,
-        confirm_password: password
+        confirm_password: password,
+        verifyStatus: 1
       })
       return { ...omit(data, ['user']), newUser: true, verify: UserVerifyStatus.Unverified }
     }
@@ -125,7 +127,8 @@ export class UserService implements IUserService {
       id: userId,
       emailVerifiedToken: emailVerifiedToken,
       password: bcryptPassword.hashPassword(user.password),
-      username: `username_${userId}`
+      username: `username_${userId}`,
+      verifyStatus: user.verifyStatus
     }
     const newUser = await this.PrismaService.create<UserModel>(DbTables.USERS, userData)
 

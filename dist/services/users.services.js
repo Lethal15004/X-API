@@ -126,7 +126,8 @@ let UserService = class UserService {
                 name: userInfo.name,
                 dateOfBirth: new Date(),
                 password,
-                confirm_password: password
+                confirm_password: password,
+                verifyStatus: 1
             });
             return { ...(0, lodash_1.omit)(data, ['user']), newUser: true, verify: enums_1.UserVerifyStatus.Unverified };
         }
@@ -157,7 +158,8 @@ let UserService = class UserService {
             id: userId,
             emailVerifiedToken: emailVerifiedToken,
             password: bcryptPassword.hashPassword(user.password),
-            username: `username_${userId}`
+            username: `username_${userId}`,
+            verifyStatus: user.verifyStatus
         };
         const newUser = await this.PrismaService.create(db_tables_1.DbTables.USERS, userData);
         const { accessToken, refreshToken } = await this.createTokens(newUser.id, enums_1.UserVerifyStatus.Unverified);

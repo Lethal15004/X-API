@@ -10,7 +10,8 @@ import {
   emailSchema,
   confirmPasswordSchema,
   refreshTokenSchema,
-  accessTokenSchema
+  accessTokenSchema,
+  verifyStatusOptional
 } from '~/constants/schemas'
 import { REGEX_USERNAME } from '~/constants/regex'
 
@@ -21,7 +22,8 @@ export const UserRegisterSchema = z
     email: emailSchema,
     password: passwordSchema,
     dateOfBirth: dateOfBirthSchema,
-    confirm_password: confirmPasswordSchema
+    confirm_password: confirmPasswordSchema,
+    verifyStatus: verifyStatusOptional
   })
   .strict()
   .refine((data) => data.password === data.confirm_password, {
