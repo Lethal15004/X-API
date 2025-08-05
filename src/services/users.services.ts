@@ -90,7 +90,8 @@ export class UserService implements IUserService {
         dateOfBirth: new Date(),
         password,
         confirm_password: password,
-        verifyStatus: 1
+        verifyStatus: 1,
+        emailVerifiedToken: ''
       })
       return { ...omit(data, ['user']), newUser: true, verify: UserVerifyStatus.Unverified }
     }
@@ -119,7 +120,9 @@ export class UserService implements IUserService {
       throwErrors('EMAIL_EXISTS')
     }
     const userId = new ObjectId()
-    const emailVerifiedToken = await this.createVerifyEmailToken(userId.toString(), UserVerifyStatus.Unverified)
+    const emailVerifiedToken = user.emailVerifiedToken
+      ? user.emailVerifiedToken
+      : await this.createVerifyEmailToken(userId.toString(), UserVerifyStatus.Unverified)
 
     const userData = {
       ...omit(user, ['confirm_password']),

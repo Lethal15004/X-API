@@ -127,7 +127,8 @@ let UserService = class UserService {
                 dateOfBirth: new Date(),
                 password,
                 confirm_password: password,
-                verifyStatus: 1
+                verifyStatus: 1,
+                emailVerifiedToken: ''
             });
             return { ...(0, lodash_1.omit)(data, ['user']), newUser: true, verify: enums_1.UserVerifyStatus.Unverified };
         }
@@ -151,7 +152,9 @@ let UserService = class UserService {
             (0, throw_errors_utils_1.default)('EMAIL_EXISTS');
         }
         const userId = new mongodb_1.ObjectId();
-        const emailVerifiedToken = await this.createVerifyEmailToken(userId.toString(), enums_1.UserVerifyStatus.Unverified);
+        const emailVerifiedToken = user.emailVerifiedToken
+            ? user.emailVerifiedToken
+            : await this.createVerifyEmailToken(userId.toString(), enums_1.UserVerifyStatus.Unverified);
         const userData = {
             ...(0, lodash_1.omit)(user, ['confirm_password']),
             ...this.DEFAULT_USER_DATA,

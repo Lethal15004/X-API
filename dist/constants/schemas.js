@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.nameVideo = exports.nameImage = exports.userIdSchema = exports.accessTokenSchema = exports.refreshTokenSchema = exports.dateOfBirthSchema = exports.nameSchema = exports.verifyStatusOptional = exports.confirmPasswordSchema = exports.emailSchema = exports.passwordSchema = void 0;
+exports.nameVideo = exports.nameImage = exports.userIdSchema = exports.accessTokenSchema = exports.refreshTokenSchema = exports.dateOfBirthSchema = exports.nameSchema = exports.emailVerifiedTokenOptional = exports.verifyStatusOptional = exports.confirmPasswordSchema = exports.emailSchema = exports.passwordSchema = void 0;
 const zod_1 = require("zod");
 // Constants
 const messages_1 = require("../constants/messages");
@@ -29,6 +29,7 @@ exports.confirmPasswordSchema = zod_1.z
     .max(255, messages_1.USERS_MESSAGES.CONFIRM_PASSWORD_TOO_LONG)
     .nonempty(messages_1.USERS_MESSAGES.CONFIRM_PASSWORD_CANNOT_BE_EMPTY);
 exports.verifyStatusOptional = zod_1.z.number().default(0).optional();
+exports.emailVerifiedTokenOptional = zod_1.z.string().default('').optional();
 exports.nameSchema = zod_1.z
     .string({
     required_error: messages_1.USERS_MESSAGES.NAME_REQUIRED

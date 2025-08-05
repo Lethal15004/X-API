@@ -33,6 +33,8 @@ export const confirmPasswordSchema = z
 
 export const verifyStatusOptional = z.number().default(0).optional()
 
+export const emailVerifiedTokenOptional = z.string().default('').optional()
+
 export const nameSchema = z
   .string({
     required_error: USERS_MESSAGES.NAME_REQUIRED

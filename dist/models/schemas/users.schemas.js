@@ -14,7 +14,8 @@ exports.UserRegisterSchema = zod_1.z
     password: schemas_1.passwordSchema,
     dateOfBirth: schemas_1.dateOfBirthSchema,
     confirm_password: schemas_1.confirmPasswordSchema,
-    verifyStatus: schemas_1.verifyStatusOptional
+    verifyStatus: schemas_1.verifyStatusOptional,
+    emailVerifiedToken: schemas_1.emailVerifiedTokenOptional
 })
     .strict()
     .refine((data) => data.password === data.confirm_password, {
