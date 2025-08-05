@@ -67,6 +67,7 @@ export class UserController {
     if (userExist) {
       res.status(HTTP_STATUS.CREATED).json({
         message: USERS_MESSAGES.REGISTER_SUCCESS,
+        id: userExist.user.id,
         accessToken: userExist.accessToken,
         refreshToken: userExist.refreshToken,
         emailVerifyToken: userExist.user.emailVerifiedToken
@@ -199,6 +200,7 @@ export class UserController {
     if (userExist) {
       res.status(HTTP_STATUS.OK).json({
         message: USERS_MESSAGES.LOGIN_SUCCESS,
+        id: userExist.user.id,
         accessToken: userExist.accessToken,
         refreshToken: userExist.refreshToken
       })
